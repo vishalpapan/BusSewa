@@ -22,13 +22,16 @@ cd BusSewa
 ```bash
 cd backend
 
+# Windows:
 # Create virtual environment
 python -m venv venv
-
 # Activate virtual environment
-# Windows:
 venv\Scripts\activate
+
 # Mac/Linux:
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
