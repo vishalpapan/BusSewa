@@ -42,6 +42,10 @@ class Passenger(models.Model):
     age_criteria = models.CharField(max_length=50, choices=AGE_CATEGORIES)
     mobile_no = models.CharField(max_length=15, blank=True)
     
+    # Family/Group Travel
+    related_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name='family_members')
+    relationship = models.CharField(max_length=50, blank=True, default='', help_text='e.g., Spouse, Child, Parent, Sibling')
+    
     # Category
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     

@@ -34,13 +34,21 @@ class Booking(models.Model):
     
     # Bus Assignment (flexible)
     assigned_bus = models.ForeignKey(Bus, on_delete=models.SET_NULL, null=True, blank=True)
-    seat_number = models.CharField(max_length=10, blank=True)
+    seat_number = models.CharField(max_length=10, blank=True, default='', help_text='Seat number (1-42)')
+    bus_number = models.CharField(max_length=20, blank=True, default='', help_text='Actual bus registration number')
+    departure_time = models.TimeField(null=True, blank=True, default=None)
     
     # Pricing
     calculated_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     # Status & Tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
+    
+    # SMS/WhatsApp Notifications
+    sms_sent = models.BooleanField(default=False, blank=True)
+    sms_sent_at = models.DateTimeField(null=True, blank=True, default=None)
+    whatsapp_sent = models.BooleanField(default=False, blank=True)
+    whatsapp_sent_at = models.DateTimeField(null=True, blank=True, default=None)
     
     # Data Capture Info
     data_captured_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
