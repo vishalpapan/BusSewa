@@ -7,6 +7,7 @@ import BookingForm from './components/BookingForm';
 import BookingList from './components/BookingList';
 import ExportData from './components/ExportData';
 import SeatAllocation from './components/SeatAllocation';
+import PickupPointManager from './components/PickupPointManager';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -91,6 +92,12 @@ function App() {
           >
             📊 Export Data
           </button>
+          <button 
+            onClick={() => setActiveTab('pickup-points')}
+            style={navButtonStyle('pickup-points')}
+          >
+            📍 Pickup Points
+          </button>
         </nav>
       </header>
       <main>
@@ -101,6 +108,7 @@ function App() {
         {activeTab === 'bookings' && <BookingList />}
         {activeTab === 'seats' && <SeatAllocation />}
         {activeTab === 'export' && <ExportData />}
+        {activeTab === 'pickup-points' && <PickupPointManager />}
       </main>
     </div>
   );

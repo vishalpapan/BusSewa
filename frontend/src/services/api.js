@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+export const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_URL = 'http://127.0.0.1:8000/api';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,6 +41,9 @@ export const bookingAPI = {
 export const pickupPointAPI = {
   getAll: () => api.get('/pickup-points/'),
   create: (data) => api.post('/pickup-points/', data),
+  getById: (id) => api.get(`/pickup-points/${id}/`),
+  update: (id, data) => api.put(`/pickup-points/${id}/`, data),
+  delete: (id) => api.delete(`/pickup-points/${id}/`),
 };
 
 // Payment API calls
