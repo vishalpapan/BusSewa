@@ -12,6 +12,7 @@ interface Booking {
   seat_number: string | number | null;
   pickup_point_name: string;
   calculated_price: number;
+  assigned_bus?: number | null;
 }
 
 interface Payment {
@@ -19,10 +20,19 @@ interface Payment {
   amount: number;
 }
 
+interface Bus {
+  id: number;
+  bus_number: string;
+  capacity: number;
+  route_name: string;
+}
+
 const SeatAllocation: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [seats, setSeats] = useState<(number | null)[]>(Array(42).fill(null));
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [selectedBus, setSelectedBus] = useState<number | null>(null);
+  const [seats, setSeats] = useState<(number | null)[]>(Array(40).fill(null));
   const [selectedPassenger, setSelectedPassenger] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -33,28 +43,38 @@ const SeatAllocation: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, paymentsRes] = await Promise.all([
+      const [bookingsRes, paymentsRes, busesRes] = await Promise.all([
         bookingAPI.getAll(),
-        paymentAPI.getAll()
+        paymentAPI.getAll(),
+        fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`).then(r => r.json())
       ]);
       
       setBookings(bookingsRes.data);
       setPayments(paymentsRes.data);
+      setBuses(busesRes);
       
-      // Initialize seats from existing allocations
-      const seatMap = Array(42).fill(null);
-      bookingsRes.data.forEach((b: Booking) => {
-        const seatNum = parseInt(b.seat_number as string);
-        if (b.seat_number && !isNaN(seatNum) && seatNum >= 1 && seatNum <= 42) {
-          seatMap[seatNum - 1] = b.id;
-        }
-      });
-      setSeats(seatMap);
+      // Set first bus as default if none selected
+      if (!selectedBus && busesRes.length > 0) {
+        setSelectedBus(busesRes[0].id);
+      }
+      
+      updateSeatsForBus(bookingsRes.data, selectedBus || (busesRes.length > 0 ? busesRes[0].id : null));
     } catch (error) {
       alert('Error loading data');
     } finally {
       setLoading(false);
     }
+  };
+  
+  const updateSeatsForBus = (allBookings: Booking[], busId: number | null) => {
+    const seatMap = Array(40).fill(null);
+    allBookings.forEach((b: Booking) => {
+      const seatNum = parseInt(b.seat_number as string);
+      if (b.seat_number && !isNaN(seatNum) && seatNum >= 1 && seatNum <= 40) {
+        seatMap[seatNum - 1] = b.id;
+      }
+    });
+    setSeats(seatMap);
   };
 
   const getPaidBookings = () => {
@@ -95,7 +115,7 @@ const SeatAllocation: React.FC = () => {
     }
     
     // Others get remaining seats
-    for (let i = 16; i < 42; i++) {
+    for (let i = 16; i < 40; i++) {
       if (seats[i] === null) return i + 1;
     }
     
@@ -103,16 +123,41 @@ const SeatAllocation: React.FC = () => {
   };
 
   const assignSeat = async (bookingId: number, seatNum: number) => {
+    if (!selectedBus) {
+      alert('Please select a bus first!');
+      return;
+    }
+    
     try {
-      console.log('Assigning seat:', { bookingId, seatNum });
-      const response = await bookingAPI.update(bookingId, { seat_number: seatNum.toString() });
+      console.log('Assigning seat:', { bookingId, seatNum, selectedBus });
+      const response = await bookingAPI.update(bookingId, { 
+        seat_number: seatNum.toString(),
+        assigned_bus: selectedBus
+      });
       console.log('Seat assigned successfully:', response);
       await fetchData();
       alert(`Seat ${seatNum} assigned successfully!`);
       setSelectedPassenger(null);
     } catch (error: any) {
       console.error('Error assigning seat:', error);
-      alert('Error assigning seat: ' + (error.response?.data?.detail || error.message || 'Unknown error'));
+      
+      let errorMsg = 'Unknown error';
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.assigned_bus) {
+          errorMsg = Array.isArray(data.assigned_bus) ? data.assigned_bus[0] : data.assigned_bus;
+        } else if (data.seat_number) {
+          errorMsg = Array.isArray(data.seat_number) ? data.seat_number[0] : data.seat_number;
+        } else if (data.non_field_errors) {
+          errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors;
+        } else {
+          errorMsg = JSON.stringify(data);
+        }
+      } else {
+        errorMsg = error.message;
+      }
+      
+      alert('Error assigning seat: ' + errorMsg);
     }
   };
 
@@ -161,10 +206,18 @@ const SeatAllocation: React.FC = () => {
                getPassengerAge(a.passenger_details.age_criteria);
       });
       
+      if (!selectedBus) {
+        alert('Please select a bus first!');
+        return;
+      }
+      
       for (const booking of sorted) {
         const suggestedSeat = getSuggestedSeat(booking);
         if (suggestedSeat) {
-          await bookingAPI.update(booking.id, { seat_number: suggestedSeat.toString() });
+          await bookingAPI.update(booking.id, { 
+            seat_number: suggestedSeat.toString(),
+            assigned_bus: selectedBus
+          });
           // Update local state
           const newSeats = [...seats];
           newSeats[suggestedSeat - 1] = booking.id;
@@ -251,46 +304,76 @@ const SeatAllocation: React.FC = () => {
       );
     }
     
-    // Last row (2 seats)
-    rows.push(
-      <div key="last" style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', gap: '8px' }}>
-        {[40, 41].map(seatIndex => (
-          <button
-            key={seatIndex}
-            onClick={() => handleSeatClick(seatIndex)}
-            disabled={loading}
-            style={{
-              width: '45px',
-              height: '45px',
-              backgroundColor: getSeatColor(seatIndex),
-              color: 'white',
-              border: selectedPassenger && seats[seatIndex] === null ? '3px solid #007bff' : 'none',
-              borderRadius: '6px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold'
-            }}
-          >
-            {seatIndex + 1}
-          </button>
-        ))}
-      </div>
-    );
-    
     return rows;
   };
 
   const unassignedBookings = getUnassignedBookings();
   const assignedCount = seats.filter(s => s !== null).length;
 
+  // Handle bus selection change
+  const handleBusChange = (busId: number) => {
+    setSelectedBus(busId);
+    setSelectedPassenger(null);
+    updateSeatsForBus(bookings, busId);
+  };
+
   return (
     <div style={{ maxWidth: '1200px', margin: '20px auto', padding: '20px' }}>
-      <h2>🚌 Seat Allocation - 42 Seater Bus</h2>
+      <h2>🚌 Seat Allocation - 40 Seater Bus</h2>
+      
+      {/* Bus Selection */}
+      <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+        <h3 style={{ margin: '0 0 10px 0' }}>Select Bus:</h3>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {buses.map(bus => (
+            <button
+              key={bus.id}
+              onClick={() => handleBusChange(bus.id)}
+              style={{
+                padding: '10px 15px',
+                backgroundColor: selectedBus === bus.id ? '#007bff' : '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
+            >
+              {bus.bus_number || `Bus ${bus.id}`}
+              {bus.route_name && <div style={{ fontSize: '12px', opacity: 0.8 }}>{bus.route_name}</div>}
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              // Create new bus
+              const busNumber = prompt('Enter bus number:');
+              if (busNumber) {
+                fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ bus_number: busNumber, capacity: 40 })
+                }).then(() => fetchData());
+              }
+            }}
+            style={{
+              padding: '10px 15px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            + Add Bus
+          </button>
+        </div>
+      </div>
       
       {/* Stats */}
       <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <div style={{ padding: '15px', backgroundColor: '#28a745', color: 'white', borderRadius: '8px', flex: 1, minWidth: '150px' }}>
-          <strong>Available:</strong> {42 - assignedCount}
+          <strong>Available:</strong> {40 - assignedCount}
         </div>
         <div style={{ padding: '15px', backgroundColor: '#dc3545', color: 'white', borderRadius: '8px', flex: 1, minWidth: '150px' }}>
           <strong>Occupied:</strong> {assignedCount}
@@ -298,6 +381,11 @@ const SeatAllocation: React.FC = () => {
         <div style={{ padding: '15px', backgroundColor: '#17a2b8', color: 'white', borderRadius: '8px', flex: 1, minWidth: '150px' }}>
           <strong>Pending:</strong> {unassignedBookings.length}
         </div>
+        {selectedBus && (
+          <div style={{ padding: '15px', backgroundColor: '#6f42c1', color: 'white', borderRadius: '8px', flex: 1, minWidth: '150px' }}>
+            <strong>Bus:</strong> {buses.find(b => b.id === selectedBus)?.bus_number || `Bus ${selectedBus}`}
+          </div>
+        )}
       </div>
 
       {/* Legend */}

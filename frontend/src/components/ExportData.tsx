@@ -4,6 +4,21 @@ import { passengerAPI, bookingAPI, paymentAPI } from '../services/api';
 const ExportData: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
+  const formatCellValue = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    
+    const stringValue = String(value);
+    
+    // Handle values with commas, quotes, or newlines by wrapping in quotes
+    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+      // Escape quotes by doubling them
+      const escapedValue = stringValue.replace(/"/g, '""');
+      return `"${escapedValue}"`;
+    }
+    
+    return stringValue;
+  };
+
   const exportToCSV = (data: any[], filename: string) => {
     if (data.length === 0) {
       alert('No data to export');
@@ -13,23 +28,20 @@ const ExportData: React.FC = () => {
     // Get headers from first object
     const headers = Object.keys(data[0]);
     
-    // Create CSV content
+    // Create CSV content with proper formatting
     const csvContent = [
-      headers.join(','), // Header row
+      headers.map(header => formatCellValue(header)).join(','), // Header row
       ...data.map(row => 
-        headers.map(header => {
-          const value = row[header];
-          // Handle values with commas by wrapping in quotes
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value || '';
-        }).join(',')
+        headers.map(header => formatCellValue(row[header])).join(',')
       )
-    ].join('\n');
+    ].join('\r\n'); // Use Windows line endings for better Excel compatibility
+
+    // Add BOM for proper UTF-8 encoding in Excel
+    const BOM = '\uFEFF';
+    const csvWithBOM = BOM + csvContent;
 
     // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -44,16 +56,17 @@ const ExportData: React.FC = () => {
     setLoading(true);
     try {
       const response = await passengerAPI.getAll();
-      const passengers = response.data.map((p: any) => ({
-        'Serial No': p.id,
-        'Name': p.name,
-        'Gender': p.gender,
-        'Age Criteria': p.age_criteria,
-        'Category': p.category,
-        'Mobile No': p.mobile_no,
+      const passengers = response.data.map((p: any, index: number) => ({
+        'S.No.': index + 1,
+        'Name': p.name || '',
+        'Gender': p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : '',
+        'Age Criteria': p.age_criteria || '',
+        'Category': p.category || '',
+        'Mobile No': p.mobile_no || '',
+        'Aadhar Number': p.aadhar_number || '',
         'Aadhar Received': p.aadhar_received ? 'Yes' : 'No',
         'Verification Status': p.verification_status || 'Not Required',
-        'Created Date': new Date(p.created_at).toLocaleDateString()
+        'Created Date': new Date(p.created_at).toLocaleDateString('en-IN')
       }));
       
       exportToCSV(passengers, 'passengers_list');
@@ -81,20 +94,21 @@ const ExportData: React.FC = () => {
         
         return {
           'Booking ID': b.id,
-          'Passenger Name': b.passenger_details?.name || 'N/A',
-          'Mobile': b.passenger_details?.mobile_no || 'N/A',
-          'Age Criteria': b.passenger_details?.age_criteria || 'N/A',
-          'Category': b.passenger_details?.category || 'N/A',
-          'Onwards Date': b.onwards_date || 'Not Set',
-          'Return Date': b.return_date || 'Not Set',
-          'Pickup Point': b.pickup_point_name || 'Not Assigned',
-          'Seat Number': b.seat_number || 'Not Assigned',
-          'Calculated Price': calculatedPrice,
-          'Amount Received': amountReceived,
-          'Balance': balance,
-          'Status': b.status,
+          'Passenger Name': b.passenger_details?.name || '',
+          'Mobile': b.passenger_details?.mobile_no || '',
+          'Age Criteria': b.passenger_details?.age_criteria || '',
+          'Category': b.passenger_details?.category || '',
+          'Onwards Date': b.onwards_date || '',
+          'Return Date': b.return_date || '',
+          'Pickup Point': b.pickup_point_name || '',
+          'Seat Number': b.seat_number || '',
+          'Bus Number': b.bus_details?.bus_number || '',
+          'Calculated Price': calculatedPrice.toFixed(2),
+          'Amount Received': amountReceived.toFixed(2),
+          'Balance': balance.toFixed(2),
+          'Status': b.status || '',
           'Remarks': b.remarks || '',
-          'Created Date': new Date(b.created_at).toLocaleDateString()
+          'Created Date': new Date(b.created_at).toLocaleDateString('en-IN')
         };
       });
       
@@ -111,14 +125,15 @@ const ExportData: React.FC = () => {
     setLoading(true);
     try {
       const response = await paymentAPI.getAll();
-      const payments = response.data.map((p: any) => ({
+      const payments = response.data.map((p: any, index: number) => ({
+        'S.No.': index + 1,
         'Payment ID': p.id,
-        'Passenger Name': p.booking_details?.passenger_details?.name || 'N/A',
-        'Amount': parseFloat(p.amount),
-        'Payment Method': p.payment_method,
-        'Collected By': p.collected_by,
-        'Payment Date': new Date(p.payment_date).toLocaleDateString(),
-        'Created Date': new Date(p.created_at).toLocaleDateString()
+        'Passenger Name': p.booking_details?.passenger_details?.name || '',
+        'Amount': parseFloat(p.amount).toFixed(2),
+        'Payment Method': p.payment_method || '',
+        'Collected By': p.collected_by || '',
+        'Payment Date': new Date(p.payment_date).toLocaleDateString('en-IN'),
+        'Created Date': new Date(p.created_at).toLocaleDateString('en-IN')
       }));
       
       exportToCSV(payments, 'payments_list');
@@ -149,25 +164,27 @@ const ExportData: React.FC = () => {
         const balance = amountReceived - calculatedPrice;
 
         return {
-          'SR': passenger.id,
-          'Name': passenger.name,
-          'Gender': passenger.gender,
-          'Age Criteria': passenger.age_criteria,
-          'Category': passenger.category,
-          'Mobile No': passenger.mobile_no,
+          'S.No.': passenger.id,
+          'Name': passenger.name || '',
+          'Gender': passenger.gender === 'M' ? 'Male' : passenger.gender === 'F' ? 'Female' : '',
+          'Age Criteria': passenger.age_criteria || '',
+          'Category': passenger.category || '',
+          'Mobile No': passenger.mobile_no || '',
+          'Aadhar Number': passenger.aadhar_number || '',
           'Aadhar Received': passenger.aadhar_received ? 'Yes' : 'No',
-          'Onwards Date': booking?.onwards_date || 'No Booking',
-          'Return Date': booking?.return_date || 'No Booking',
-          'Pickup Point': booking?.pickup_point_name || 'Not Assigned',
-          'Seat Number': booking?.seat_number || 'Not Assigned',
-          'Calculated Price': calculatedPrice,
-          'Amount Received': amountReceived,
-          'Balance': balance,
-          'Payment Method': payment?.payment_method || 'Not Paid',
-          'Collected By': payment?.collected_by || 'Not Paid',
-          'Booking Status': booking?.status || 'No Booking',
+          'Onwards Date': booking?.onwards_date || '',
+          'Return Date': booking?.return_date || '',
+          'Pickup Point': booking?.pickup_point_name || '',
+          'Seat Number': booking?.seat_number || '',
+          'Bus Number': booking?.bus_details?.bus_number || '',
+          'Calculated Price': calculatedPrice > 0 ? calculatedPrice.toFixed(2) : '',
+          'Amount Received': amountReceived > 0 ? amountReceived.toFixed(2) : '',
+          'Balance': balance !== 0 ? balance.toFixed(2) : '',
+          'Payment Method': payment?.payment_method || '',
+          'Collected By': payment?.collected_by || '',
+          'Booking Status': booking?.status || '',
           'Remarks': booking?.remarks || '',
-          'Created Date': new Date(passenger.created_at).toLocaleDateString()
+          'Created Date': new Date(passenger.created_at).toLocaleDateString('en-IN')
         };
       });
 

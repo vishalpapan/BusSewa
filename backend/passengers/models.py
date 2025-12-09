@@ -1,5 +1,5 @@
 from django.db import models
-from .validators import validate_document_file
+from .validators import validate_document_file, validate_aadhar_number
 
 def passenger_document_path(instance, filename):
     # Generate secure filename: passenger_ID_timestamp.extension
@@ -41,6 +41,7 @@ class Passenger(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     age_criteria = models.CharField(max_length=50, choices=AGE_CATEGORIES)
     mobile_no = models.CharField(max_length=15, blank=True)
+    aadhar_number = models.CharField(max_length=12, blank=True, validators=[validate_aadhar_number], help_text='12-digit Aadhar number')
     
     # Family/Group Travel
     related_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name='family_members')

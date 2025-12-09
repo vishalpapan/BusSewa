@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { passengerAPI } from '../services/api';
 
 interface PassengerFormProps {
@@ -12,11 +12,29 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
     age_criteria: '',
     category: '',
     mobile_no: '',
+    aadhar_number: '',
     aadhar_received: false,
+    related_to: '',
+    relationship: '',
   });
+  const [passengers, setPassengers] = useState<any[]>([]);
+  const [showFamilyOptions, setShowFamilyOptions] = useState(false);
   const [aadharFile, setAadharFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchPassengers();
+  }, []);
+
+  const fetchPassengers = async () => {
+    try {
+      const response = await passengerAPI.getAll();
+      setPassengers(response.data);
+    } catch (error) {
+      console.error('Error fetching passengers:', error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -57,8 +75,13 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
         age_criteria: '',
         category: '',
         mobile_no: '',
+        aadhar_number: '',
         aadhar_received: false,
+        related_to: '',
+        relationship: '',
       });
+      setShowFamilyOptions(false);
+      fetchPassengers(); // Refresh passenger list
       setAadharFile(null);
       if (onSuccess) onSuccess();
     } catch (error: any) {
@@ -146,6 +169,22 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
         </div>
 
         <div style={{ marginBottom: '15px' }}>
+          <label>Aadhar Number:</label>
+          <input
+            type="text"
+            name="aadhar_number"
+            value={formData.aadhar_number}
+            onChange={handleChange}
+            placeholder="Enter 12-digit Aadhar number"
+            maxLength={12}
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+          />
+          <small style={{ color: '#666', fontSize: '12px' }}>
+            Optional: 12-digit Aadhar number (numbers only)
+          </small>
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
           <label>
             <input
               type="checkbox"
@@ -157,6 +196,61 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
             Aadhar Card Received (Physical Copy)
           </label>
         </div>
+
+        {/* Family Grouping */}
+        <div style={{ marginBottom: '15px' }}>
+          <label>
+            <input
+              type="checkbox"
+              checked={showFamilyOptions}
+              onChange={(e) => setShowFamilyOptions(e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            This passenger is related to another passenger
+          </label>
+        </div>
+
+        {showFamilyOptions && (
+          <div style={{ marginBottom: '15px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
+            <div style={{ marginBottom: '10px' }}>
+              <label>Related to:</label>
+              <select
+                name="related_to"
+                value={formData.related_to}
+                onChange={handleChange}
+                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+              >
+                <option value="">Select a passenger</option>
+                {passengers.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} - {p.mobile_no} ({p.category})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Relationship:</label>
+              <select
+                name="relationship"
+                value={formData.relationship}
+                onChange={handleChange}
+                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+              >
+                <option value="">Select relationship</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Child">Child</option>
+                <option value="Parent">Parent</option>
+                <option value="Sibling">Sibling</option>
+                <option value="Grandparent">Grandparent</option>
+                <option value="Grandchild">Grandchild</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '5px' }}>
+              Family members will be seated together when possible
+            </small>
+          </div>
+        )}
 
         <div style={{ marginBottom: '15px' }}>
           <label>Upload Aadhar Document (Optional):</label>

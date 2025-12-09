@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from passengers.models import Passenger
 
 class PickupPoint(models.Model):
@@ -11,7 +11,7 @@ class PickupPoint(models.Model):
 
 class Bus(models.Model):
     bus_number = models.CharField(max_length=20, blank=True)
-    capacity = models.IntegerField(default=42)
+    capacity = models.IntegerField(default=40)
     route_name = models.CharField(max_length=100, blank=True)
     
     def __str__(self):
@@ -34,7 +34,7 @@ class Booking(models.Model):
     
     # Bus Assignment (flexible)
     assigned_bus = models.ForeignKey(Bus, on_delete=models.SET_NULL, null=True, blank=True)
-    seat_number = models.CharField(max_length=10, blank=True, default='', help_text='Seat number (1-42)')
+    seat_number = models.CharField(max_length=10, blank=True, default='', help_text='Seat number (1-40)')
     bus_number = models.CharField(max_length=20, blank=True, default='', help_text='Actual bus registration number')
     departure_time = models.TimeField(null=True, blank=True, default=None)
     
@@ -51,7 +51,7 @@ class Booking(models.Model):
     whatsapp_sent_at = models.DateTimeField(null=True, blank=True, default=None)
     
     # Data Capture Info
-    data_captured_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    data_captured_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     data_captured_date = models.DateField(auto_now_add=True)
     
     # Remarks

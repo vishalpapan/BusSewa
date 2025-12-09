@@ -1,4 +1,5 @@
 import os
+import re
 from django.core.exceptions import ValidationError
 
 def validate_document_file(file):
@@ -21,3 +22,22 @@ def validate_document_file(file):
         raise ValidationError('Invalid file name')
     
     return file
+
+def validate_aadhar_number(value):
+    """Validate Aadhar number format"""
+    if not value:
+        return value  # Allow empty values
+    
+    # Remove spaces and hyphens
+    cleaned = re.sub(r'[\s-]', '', value)
+    
+    # Check if it's exactly 12 digits
+    if not re.match(r'^\d{12}$', cleaned):
+        raise ValidationError('Aadhar number must be exactly 12 digits')
+    
+    # Basic checksum validation (Verhoeff algorithm - simplified)
+    # This is a basic check, not the full Verhoeff algorithm
+    if cleaned == '000000000000' or cleaned == '123456789012':
+        raise ValidationError('Invalid Aadhar number')
+    
+    return cleaned
