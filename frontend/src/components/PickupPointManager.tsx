@@ -94,34 +94,48 @@ const PickupPointManager: React.FC = () => {
   };
 
   return (
-    <div className="pickup-point-manager">
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h2>Manage Pickup Points</h2>
       
       {/* Add New Pickup Point */}
-      <div className="add-pickup-point">
+      <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
         <h3>Add New Pickup Point</h3>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Name:</label>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Name:</label>
             <input
               type="text"
               value={newPoint.name}
               onChange={(e) => setNewPoint({ ...newPoint, name: e.target.value })}
               placeholder="e.g., Central Bus Station"
               required
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
             />
           </div>
-          <div className="form-group">
-            <label>Location:</label>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Location:</label>
             <input
               type="text"
               value={newPoint.location}
               onChange={(e) => setNewPoint({ ...newPoint, location: e.target.value })}
               placeholder="e.g., Near City Mall, Main Road"
               required
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
             />
           </div>
-          <button type="submit" disabled={loading}>
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{
+              background: loading ? '#ccc' : '#007bff',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '4px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginRight: '10px'
+            }}
+          >
             {loading ? 'Adding...' : 'Add Pickup Point'}
           </button>
         </form>
@@ -129,31 +143,56 @@ const PickupPointManager: React.FC = () => {
 
       {/* Edit Form */}
       {editingPoint && (
-        <div className="edit-pickup-point">
+        <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
           <h3>Edit Pickup Point</h3>
           <form onSubmit={handleEdit}>
-            <div className="form-group">
-              <label>Name:</label>
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Name:</label>
               <input
                 type="text"
                 value={editingPoint.name}
                 onChange={(e) => setEditingPoint({ ...editingPoint, name: e.target.value })}
                 required
+                style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
               />
             </div>
-            <div className="form-group">
-              <label>Location:</label>
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Location:</label>
               <input
                 type="text"
                 value={editingPoint.location}
                 onChange={(e) => setEditingPoint({ ...editingPoint, location: e.target.value })}
                 required
+                style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
               />
             </div>
-            <button type="submit" disabled={loading}>
+            <button 
+              type="submit" 
+              disabled={loading}
+              style={{
+                background: loading ? '#ccc' : '#28a745',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '4px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                marginRight: '10px'
+              }}
+            >
               {loading ? 'Updating...' : 'Update'}
             </button>
-            <button type="button" onClick={() => setEditingPoint(null)}>
+            <button 
+              type="button" 
+              onClick={() => setEditingPoint(null)}
+              style={{
+                background: '#6c757d',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
               Cancel
             </button>
           </form>
@@ -161,113 +200,52 @@ const PickupPointManager: React.FC = () => {
       )}
 
       {/* Pickup Points List */}
-      <div className="pickup-points-list">
+      <div>
         <h3>Existing Pickup Points</h3>
         {pickupPoints.length === 0 ? (
           <p>No pickup points added yet.</p>
         ) : (
-          <div className="pickup-points-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
             {pickupPoints.map((point) => (
-              <div key={point.id} className="pickup-point-card">
-                <h4>{point.name}</h4>
-                <p>{point.location}</p>
-                <div className="actions">
-                  <button onClick={() => setEditingPoint(point)}>Edit</button>
-                  <button onClick={() => handleDelete(point.id!)}>Delete</button>
+              <div key={point.id} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', background: 'white' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>{point.name}</h4>
+                <p style={{ margin: '0 0 15px 0', color: '#666' }}>{point.location}</p>
+                <div>
+                  <button 
+                    onClick={() => setEditingPoint(point)}
+                    style={{
+                      background: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      padding: '5px 10px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      marginRight: '10px',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(point.id!)}
+                    style={{
+                      background: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      padding: '5px 10px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .pickup-point-manager {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .add-pickup-point, .edit-pickup-point {
-          background: #f5f5f5;
-          padding: 20px;
-          border-radius: 8px;
-          margin-bottom: 30px;
-        }
-
-        .form-group {
-          margin-bottom: 15px;
-        }
-
-        .form-group label {
-          display: block;
-          margin-bottom: 5px;
-          font-weight: bold;
-        }
-
-        .form-group input {
-          width: 100%;
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 14px;
-        }
-
-        button {
-          background: #007bff;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 4px;
-          cursor: pointer;
-          margin-right: 10px;
-        }
-
-        button:hover {
-          background: #0056b3;
-        }
-
-        button:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-        }
-
-        .pickup-points-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 20px;
-        }
-
-        .pickup-point-card {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 15px;
-          background: white;
-        }
-
-        .pickup-point-card h4 {
-          margin: 0 0 10px 0;
-          color: #333;
-        }
-
-        .pickup-point-card p {
-          margin: 0 0 15px 0;
-          color: #666;
-        }
-
-        .actions button {
-          font-size: 12px;
-          padding: 5px 10px;
-        }
-
-        .actions button:first-child {
-          background: #28a745;
-        }
-
-        .actions button:last-child {
-          background: #dc3545;
-        }
-      `}</style>
     </div>
   );
 };
