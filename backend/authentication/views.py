@@ -33,14 +33,11 @@ class LoginView(View):
                     defaults={'full_name': user.get_full_name() or user.username}
                 )
                 
-<<<<<<< HEAD
                 # Set role for superuser
                 if user.is_superuser:
                     user.role = 'admin'
                     user.save()
                 
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                 return JsonResponse({
                     'success': True,
                     'user': {
@@ -133,17 +130,8 @@ def register_user(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_users(request):
-<<<<<<< HEAD
     """List all users for dropdown purposes"""
     users = User.objects.filter(is_active=True).order_by('username')
-=======
-    """List all users with permissions - volunteers can only see other volunteers"""
-    if request.user.role == 'admin':
-        users = User.objects.all().order_by('-date_joined')
-    else:
-        # Volunteers can only see volunteers and admins for assignment purposes
-        users = User.objects.filter(role__in=['volunteer', 'admin']).order_by('-date_joined')
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     user_data = []
     
     for user in users:
@@ -155,20 +143,8 @@ def list_users(request):
         user_data.append({
             'id': user.id,
             'username': user.username,
-<<<<<<< HEAD
             'full_name': profile.full_name,
             'role': user.role
-=======
-            'role': user.role,
-            'is_active': user.is_active,
-            'can_modify_seat_allocation': user.can_modify_seat_allocation,
-            'can_cancel_seats': user.can_cancel_seats,
-            'date_joined': user.date_joined,
-            'profile': {
-                'full_name': profile.full_name,
-                'department': profile.department
-            }
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         })
     
     return Response(user_data)
@@ -177,23 +153,12 @@ def list_users(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_user(request):
-<<<<<<< HEAD
     """Create new user - Temporarily allow any for testing"""
     print(f"DEBUG: Creating user with data: {request.data}")
     
     # TODO: Re-enable admin check after testing
     # if not request.user.is_authenticated or request.user.role != 'admin':
     #     return Response({'error': 'Admin access required'}, status=403)
-=======
-    """Create new user - Admin only"""
-    print(f"DEBUG: User: {request.user}, Authenticated: {request.user.is_authenticated}, Role: {getattr(request.user, 'role', 'NO_ROLE')}")
-    
-    if not request.user.is_authenticated:
-        return Response({'error': 'Authentication required'}, status=401)
-    
-    if not hasattr(request.user, 'role') or request.user.role != 'admin':
-        return Response({'error': f'Admin access required. Current role: {getattr(request.user, "role", "unknown")}'}, status=403)
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     
     try:
         data = request.data
