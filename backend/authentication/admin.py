@@ -17,25 +17,16 @@ class UserAdmin(BaseUserAdmin):
     list_editable = ['is_active']
     
     fieldsets = BaseUserAdmin.fieldsets + (
-<<<<<<< HEAD
         ('BusSewa Role & Permissions', {
-=======
-        ('Role & Permissions', {
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
             'fields': ('role', 'can_modify_seat_allocation', 'can_cancel_seats'),
             'description': 'Role Templates: Admin (all permissions), Volunteer (seat modification only), Viewer (read-only)'
         }),
     )
     
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-<<<<<<< HEAD
         ('BusSewa Role & Permissions', {
             'fields': ('role', 'can_modify_seat_allocation', 'can_cancel_seats'),
             'description': 'Choose role to auto-set permissions'
-=======
-        ('Role & Permissions', {
-            'fields': ('role', 'can_modify_seat_allocation', 'can_cancel_seats')
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         }),
     )
     
