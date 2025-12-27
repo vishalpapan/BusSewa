@@ -9,14 +9,9 @@ const ExportData: React.FC = () => {
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   
   const availableColumns = [
-<<<<<<< HEAD
     'S.No.', 'Name', 'Gender', 'Age', 'Age Criteria', 'Category', 'Mobile No', 'Aadhar Number',
     'Journey Type', 'Onward Date', 'Return Date', 'Onward Seat', 'Return Seat', 'Onward Bus', 'Return Bus',
     'Onward Price', 'Return Price', 'Total Price', 'Volunteer', 'Payment Status', 'Payment Method',
-=======
-    'S.No.', 'Name', 'Gender', 'Age Criteria', 'Category', 'Mobile No', 'Aadhar Number',
-    'Volunteer', 'Seat Number', 'Bus Number', 'Amount', 'Payment Status', 'Payment Method',
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     'Collected By', 'Payment Date', 'Booking Status', 'Created Date'
   ];
   
@@ -103,18 +98,12 @@ const ExportData: React.FC = () => {
         'S.No.': index + 1,
         'Name': p.name || '',
         'Gender': p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : '',
-<<<<<<< HEAD
         'Age': p.age || '',
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         'Age Criteria': p.age_criteria || '',
         'Category': p.category || '',
         'Mobile No': p.mobile_no || '',
         'Aadhar Number': p.aadhar_number || '',
-<<<<<<< HEAD
         'Aadhar Required': p.aadhar_required ? 'Yes' : 'No',
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         'Aadhar Received': p.aadhar_received ? 'Yes' : 'No',
         'Verification Status': p.verification_status || 'Not Required',
         'Created Date': new Date(p.created_at).toLocaleDateString('en-IN')
@@ -141,19 +130,13 @@ const ExportData: React.FC = () => {
       const bookings = bookingsRes.data.map((b: any) => {
         const payment = paymentsRes.data.find((p: any) => p.booking === b.id);
         const amountReceived = payment ? parseFloat(payment.amount) : 0;
-<<<<<<< HEAD
         const totalPrice = parseFloat(b.total_price || 0);
         const balance = amountReceived - totalPrice;
-=======
-        const calculatedPrice = parseFloat(b.calculated_price);
-        const balance = amountReceived - calculatedPrice;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         
         return {
           'Booking ID': b.id,
           'Passenger Name': b.passenger_details?.name || '',
           'Mobile': b.passenger_details?.mobile_no || '',
-<<<<<<< HEAD
           'Age': b.passenger_details?.age || '',
           'Age Criteria': b.passenger_details?.age_criteria || '',
           'Category': b.passenger_details?.category || '',
@@ -168,16 +151,6 @@ const ExportData: React.FC = () => {
           'Onward Price': parseFloat(b.onward_price || 0).toFixed(2),
           'Return Price': parseFloat(b.return_price || 0).toFixed(2),
           'Total Price': totalPrice.toFixed(2),
-=======
-          'Age Criteria': b.passenger_details?.age_criteria || '',
-          'Category': b.passenger_details?.category || '',
-          'Onwards Date': b.onwards_date || '',
-          'Return Date': b.return_date || '',
-          'Pickup Point': b.pickup_point_name || '',
-          'Seat Number': b.seat_number || '',
-          'Bus Number': b.bus_details?.bus_number || '',
-          'Calculated Price': calculatedPrice.toFixed(2),
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
           'Amount Received': amountReceived.toFixed(2),
           'Balance': balance.toFixed(2),
           'Status': b.status || '',
@@ -315,30 +288,20 @@ const ExportData: React.FC = () => {
       });
 
       const allData = passengersRes.data.map((passenger: any, index: number) => {
-<<<<<<< HEAD
         const booking = bookingsRes.data.find((b: any) => b.passenger_details?.id === passenger.id || b.passenger === passenger.id);
         const payment = paymentsRes.data.find((p: any) => p.booking === booking?.id);
         const totalPrice = booking ? parseFloat(booking.total_price || 0) : 0;
-=======
-        const booking = bookingsRes.data.find((b: any) => b.passenger === passenger.id);
-        const payment = paymentsRes.data.find((p: any) => p.booking === booking?.id);
-        const finalAmount = booking ? parseFloat(booking.custom_amount || booking.calculated_price || 0) : 0;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         const amountReceived = payment ? parseFloat(payment.amount) : 0;
         
         const fullData = {
           'S.No.': index + 1,
           'Name': passenger.name || '',
           'Gender': passenger.gender === 'M' ? 'Male' : passenger.gender === 'F' ? 'Female' : '',
-<<<<<<< HEAD
           'Age': passenger.age || '',
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
           'Age Criteria': passenger.age_criteria || '',
           'Category': passenger.category || '',
           'Mobile No': passenger.mobile_no || '',
           'Aadhar Number': passenger.aadhar_number || '',
-<<<<<<< HEAD
           'Journey Type': booking?.journey_type || '',
           'Onward Date': booking?.onward_journey_details?.journey_date || '',
           'Return Date': booking?.return_journey_details?.journey_date || '',
@@ -350,12 +313,6 @@ const ExportData: React.FC = () => {
           'Return Price': booking ? parseFloat(booking.return_price || 0).toFixed(2) : '',
           'Total Price': totalPrice > 0 ? totalPrice.toFixed(2) : '',
           'Volunteer': booking?.assigned_volunteer_details?.username || '',
-=======
-          'Volunteer': booking?.assigned_volunteer_details?.username || '',
-          'Seat Number': booking?.seat_number || '',
-          'Bus Number': booking?.bus_details?.bus_number || '',
-          'Amount': finalAmount > 0 ? finalAmount.toFixed(2) : '',
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
           'Payment Status': booking?.payment_status || 'Pending',
           'Payment Method': payment?.payment_method || '',
           'Collected By': payment?.collected_by || '',

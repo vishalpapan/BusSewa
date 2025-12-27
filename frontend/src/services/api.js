@@ -33,11 +33,7 @@ export const bookingAPI = {
   getAll: () => api.get('/bookings/'),
   create: (data) => api.post('/bookings/', data),
   getById: (id) => api.get(`/bookings/${id}/`),
-<<<<<<< HEAD
   update: (id, data) => api.patch(`/bookings/${id}/`, data),
-=======
-  update: (id, data) => api.put(`/bookings/${id}/`, data),
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   delete: (id) => api.delete(`/bookings/${id}/`),
 };
 

@@ -8,7 +8,6 @@ interface DashboardStats {
   totalRevenue: number;
   pendingPayments: number;
   pendingAmount: number;
-<<<<<<< HEAD
   onwardBookings: number;
   returnBookings: number;
   onwardRevenue: number;
@@ -19,8 +18,6 @@ interface DashboardStats {
     bookings: number;
     revenue: number;
   }>;
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 }
 
 const Dashboard: React.FC = () => {
@@ -31,14 +28,11 @@ const Dashboard: React.FC = () => {
     totalRevenue: 0,
     pendingPayments: 0,
     pendingAmount: 0,
-<<<<<<< HEAD
     onwardBookings: 0,
     returnBookings: 0,
     onwardRevenue: 0,
     returnRevenue: 0,
     journeyStats: [],
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   });
   const [loading, setLoading] = useState(true);
 
@@ -48,37 +42,24 @@ const Dashboard: React.FC = () => {
 
   const fetchDashboardData = async () => {
     try {
-<<<<<<< HEAD
       const [passengersRes, bookingsRes, paymentsRes, journeysRes] = await Promise.all([
         passengerAPI.getAll(),
         bookingAPI.getAll(),
         paymentAPI.getAll(),
         fetch('http://127.0.0.1:8000/api/journeys/', { credentials: 'include' }),
-=======
-      const [passengersRes, bookingsRes, paymentsRes] = await Promise.all([
-        passengerAPI.getAll(),
-        bookingAPI.getAll(),
-        paymentAPI.getAll(),
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       ]);
 
       const passengers = passengersRes.data;
       const bookings = bookingsRes.data;
       const payments = paymentsRes.data;
-<<<<<<< HEAD
       const journeys = await journeysRes.json();
 
       // Calculate basic stats
-=======
-
-      // Calculate stats
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       const totalRevenue = payments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
       const totalBookingAmount = bookings.reduce((sum: number, booking: any) => sum + parseFloat(booking.calculated_price), 0);
       const pendingAmount = totalBookingAmount - totalRevenue;
       const pendingPayments = bookings.length - payments.length;
 
-<<<<<<< HEAD
       // Calculate journey-wise stats
       const onwardBookings = bookings.filter((b: any) => b.onward_journey).length;
       const returnBookings = bookings.filter((b: any) => b.return_journey).length;
@@ -107,8 +88,6 @@ const Dashboard: React.FC = () => {
         };
       });
 
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       setStats({
         totalPassengers: passengers.length,
         totalBookings: bookings.length,
@@ -116,14 +95,11 @@ const Dashboard: React.FC = () => {
         totalRevenue,
         pendingPayments: Math.max(0, pendingPayments),
         pendingAmount: Math.max(0, pendingAmount),
-<<<<<<< HEAD
         onwardBookings,
         returnBookings,
         onwardRevenue,
         returnRevenue,
         journeyStats,
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -199,7 +175,6 @@ const Dashboard: React.FC = () => {
           color="#dc3545"
           icon="📋"
         />
-<<<<<<< HEAD
         <StatCard
           title="Onward Bookings"
           value={stats.onwardBookings}
@@ -262,11 +237,6 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Summary */}
-=======
-      </div>
-
-      {/* Quick Actions */}
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       <div style={{
         backgroundColor: 'white',
         padding: '20px',

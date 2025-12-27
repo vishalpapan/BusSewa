@@ -6,17 +6,13 @@ interface PassengerData {
   name: string;
   gender: string;
   age_criteria: string;
-<<<<<<< HEAD
   age: number;
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   category: string;
   mobile_no: string;
   aadhar_number: string;
   aadhar_received: boolean;
   verification_status: string;
   created_at: string;
-<<<<<<< HEAD
   booking?: {
     id: number;
     status: string;
@@ -28,11 +24,6 @@ interface PassengerData {
     total_price: number;
   };
   payment?: any;
-=======
-  booking?: any;
-  payment?: any;
-  bus?: any;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 }
 
 const LivePassengerList: React.FC = () => {
@@ -75,22 +66,13 @@ const LivePassengerList: React.FC = () => {
       setBuses(busesData);
       
       const enrichedPassengers = passengersRes.data.map((passenger: any) => {
-<<<<<<< HEAD
         const booking = bookingsRes.data.find((b: any) => b.passenger_details?.id === passenger.id || b.passenger === passenger.id);
-=======
-        const booking = bookingsRes.data.find((b: any) => b.passenger === passenger.id);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         const payment = paymentsRes.data.find((p: any) => p.booking === booking?.id);
         
         return {
           ...passenger,
           booking,
-<<<<<<< HEAD
           payment
-=======
-          payment,
-          bus: booking?.bus_details || null
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         };
       });
 
@@ -102,7 +84,6 @@ const LivePassengerList: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
   const handleCancelBooking = async (passenger: PassengerData) => {
     if (!passenger.booking) {
       alert('No booking to cancel');
@@ -132,38 +113,6 @@ const LivePassengerList: React.FC = () => {
       }
     } catch (error) {
       alert('Error cancelling booking: ' + (error as Error).message);
-=======
-  const handleDeletePassenger = async (passengerId: number, passengerName: string, hasBooking: boolean, hasSeat: boolean) => {
-    let confirmMessage = `Are you sure you want to delete passenger "${passengerName}"?`;
-    
-    if (hasBooking) {
-      confirmMessage += '\n\n⚠️ WARNING: This passenger has booking records.';
-    }
-    if (hasSeat) {
-      confirmMessage += '\n⚠️ WARNING: This passenger has an assigned seat.';
-    }
-    confirmMessage += '\n\nThis action cannot be undone and will delete all related data (bookings, payments, seat assignments).';
-    
-    if (!window.confirm(confirmMessage)) return;
-    
-    setDeleteLoading(passengerId);
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/passengers/${passengerId}/`, {
-        method: 'DELETE'
-      });
-      
-      if (response.ok) {
-        alert('Passenger deleted successfully!');
-        fetchAllData(); // Refresh the list
-      } else {
-        const errorData = await response.text();
-        alert('Error deleting passenger: ' + errorData);
-      }
-    } catch (error) {
-      alert('Error deleting passenger: ' + (error as Error).message);
-    } finally {
-      setDeleteLoading(null);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     }
   };
 
@@ -198,17 +147,11 @@ const LivePassengerList: React.FC = () => {
     // Booking status filter
     if (filters.booking_status) {
       if (filters.booking_status === 'booked') {
-<<<<<<< HEAD
         filtered = filtered.filter(p => p.booking && p.booking.status === 'Active');
       } else if (filters.booking_status === 'not_booked') {
         filtered = filtered.filter(p => !p.booking);
       } else if (filters.booking_status === 'cancelled') {
         filtered = filtered.filter(p => p.booking && p.booking.status === 'Cancelled');
-=======
-        filtered = filtered.filter(p => p.booking);
-      } else if (filters.booking_status === 'not_booked') {
-        filtered = filtered.filter(p => !p.booking);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       }
     }
 
@@ -224,28 +167,18 @@ const LivePassengerList: React.FC = () => {
     // Seat status filter
     if (filters.seat_status) {
       if (filters.seat_status === 'assigned') {
-<<<<<<< HEAD
         filtered = filtered.filter(p => p.booking?.onward_seat_number || p.booking?.return_seat_number);
       } else if (filters.seat_status === 'unassigned') {
         filtered = filtered.filter(p => !p.booking?.onward_seat_number && !p.booking?.return_seat_number);
-=======
-        filtered = filtered.filter(p => p.booking?.seat_number);
-      } else if (filters.seat_status === 'unassigned') {
-        filtered = filtered.filter(p => !p.booking?.seat_number);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       }
     }
     
     // Bus number filter
     if (filters.bus_number) {
-<<<<<<< HEAD
       filtered = filtered.filter(p => 
         p.booking?.onward_bus_details?.bus_number === filters.bus_number ||
         p.booking?.return_bus_details?.bus_number === filters.bus_number
       );
-=======
-      filtered = filtered.filter(p => p.bus?.bus_number === filters.bus_number);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     }
 
     setFilteredPassengers(filtered);
@@ -269,13 +202,9 @@ const LivePassengerList: React.FC = () => {
   };
 
   const getStatusBadge = (passenger: PassengerData) => {
-<<<<<<< HEAD
     if (passenger.booking?.status === 'Cancelled') {
       return { text: 'Cancelled', color: '#dc3545' };
     } else if (passenger.payment && parseFloat(passenger.payment.amount) > 0) {
-=======
-    if (passenger.payment && parseFloat(passenger.payment.amount) > 0) {
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       return { text: 'Paid', color: '#28a745' };
     } else if (passenger.booking) {
       return { text: 'Booked', color: '#ffc107' };
@@ -378,12 +307,8 @@ const LivePassengerList: React.FC = () => {
               style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
             >
               <option value="">All</option>
-<<<<<<< HEAD
               <option value="booked">Active Bookings</option>
               <option value="cancelled">Cancelled Bookings</option>
-=======
-              <option value="booked">Booked</option>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
               <option value="not_booked">Not Booked</option>
             </select>
           </div>
@@ -508,7 +433,6 @@ const LivePassengerList: React.FC = () => {
                     ) : '-'}
                   </td>
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-<<<<<<< HEAD
                     <div>
                       {passenger.booking?.onward_seat_number && (
                         <div>Onward: {passenger.booking.onward_seat_number}</div>
@@ -533,15 +457,6 @@ const LivePassengerList: React.FC = () => {
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                     {passenger.booking?.total_price ? `₹${passenger.booking.total_price}` : 
                      passenger.payment ? `₹${parseFloat(passenger.payment.amount).toFixed(2)}` : '-'}
-=======
-                    {passenger.booking?.seat_number || '-'}
-                  </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                    {passenger.bus?.bus_number || '-'}
-                  </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                    {passenger.payment ? `₹${parseFloat(passenger.payment.amount).toFixed(2)}` : '-'}
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                   </td>
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                     <span style={{
@@ -557,7 +472,6 @@ const LivePassengerList: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                     <button
-<<<<<<< HEAD
                       onClick={() => handleCancelBooking(passenger)}
                       disabled={!passenger.booking || passenger.booking.status === 'Cancelled'}
                       style={{
@@ -572,27 +486,6 @@ const LivePassengerList: React.FC = () => {
                       title="Cancel booking"
                     >
                       🚫 Cancel
-=======
-                      onClick={() => handleDeletePassenger(
-                        passenger.id, 
-                        passenger.name, 
-                        !!passenger.booking, 
-                        !!passenger.booking?.seat_number
-                      )}
-                      disabled={deleteLoading === passenger.id}
-                      style={{
-                        backgroundColor: deleteLoading === passenger.id ? '#ccc' : '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        cursor: deleteLoading === passenger.id ? 'not-allowed' : 'pointer',
-                        fontSize: '12px'
-                      }}
-                      title="Delete passenger (Admin only)"
-                    >
-                      {deleteLoading === passenger.id ? '⏳' : '🗑️'}
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                     </button>
                   </td>
                 </tr>

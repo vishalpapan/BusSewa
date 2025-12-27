@@ -8,7 +8,6 @@ interface Booking {
     mobile_no: string;
     age_criteria: string;
   };
-<<<<<<< HEAD
   journey_type: string;
   onward_journey_details?: {
     journey_date: string;
@@ -22,12 +21,6 @@ interface Booking {
   onward_price: number;
   return_price: number;
   total_price: number;
-=======
-  onwards_date: string;
-  return_date: string;
-  pickup_point_name: string;
-  calculated_price: number;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   custom_amount?: number;
   payment_status: string;
   status: string;
@@ -38,7 +31,6 @@ interface Booking {
     username: string;
     profile: { full_name: string };
   };
-<<<<<<< HEAD
   onward_seat_number: string;
   return_seat_number: string;
   onward_bus_details?: {
@@ -46,16 +38,11 @@ interface Booking {
     bus_number: string;
   };
   return_bus_details?: {
-=======
-  seat_number: string;
-  bus_details?: {
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     id: number;
     bus_number: string;
   };
 }
 
-<<<<<<< HEAD
 
 
 interface Volunteer {
@@ -63,20 +50,11 @@ interface Volunteer {
   username: string;
   full_name: string;
   role: string;
-=======
-interface Volunteer {
-  id: number;
-  name: string;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 }
 
 const BookingList: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
-<<<<<<< HEAD
 
-=======
-  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   const [loading, setLoading] = useState(true);
   const [paymentModal, setPaymentModal] = useState<{ show: boolean; booking: Booking | null }>({
     show: false,
@@ -101,20 +79,10 @@ const BookingList: React.FC = () => {
 
   useEffect(() => {
     fetchBookings();
-<<<<<<< HEAD
 
   }, []);
 
 
-=======
-    fetchVolunteers();
-  }, []);
-
-  // Debug: Log volunteers state
-  useEffect(() => {
-    console.log('Volunteers loaded:', volunteers);
-  }, [volunteers]);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
   const fetchBookings = async () => {
     try {
@@ -127,7 +95,6 @@ const BookingList: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
 
 
 
@@ -135,35 +102,12 @@ const BookingList: React.FC = () => {
   const openPaymentModal = (booking: Booking) => {
     setPaymentModal({ show: true, booking });
     const finalAmount = booking.custom_amount || booking.total_price || 0;
-=======
-  const fetchVolunteers = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/volunteers/', {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      setVolunteers(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching volunteers:', error);
-      setVolunteers([]);
-    }
-  };
-
-  const openPaymentModal = (booking: Booking) => {
-    setPaymentModal({ show: true, booking });
-    const finalAmount = booking.custom_amount || booking.calculated_price;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     setPaymentData({
       amount: finalAmount.toString(),
       payment_method: 'Cash',
       collected_by: '',
       payment_received_date: new Date().toISOString().split('T')[0],
     });
-<<<<<<< HEAD
-=======
-    // Fetch volunteers again when modal opens to ensure fresh data
-    fetchVolunteers();
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   };
   
   const updateBookingAmount = async (bookingId: number, newAmount: string) => {
@@ -189,37 +133,21 @@ const BookingList: React.FC = () => {
     });
   };
   
-<<<<<<< HEAD
   const handleBookingCancellation = async (e: React.FormEvent) => {
-=======
-  const handleSeatCancellation = async (e: React.FormEvent) => {
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     e.preventDefault();
     if (!cancelModal.booking) return;
     
     try {
-<<<<<<< HEAD
       await fetch(`http://127.0.0.1:8000/api/bookings/${cancelModal.booking.id}/cancel_booking/`, {
-=======
-      await fetch(`http://127.0.0.1:8000/api/bookings/${cancelModal.booking.id}/cancel_seat/`, {
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cancelData)
       });
-<<<<<<< HEAD
       alert('Booking cancelled successfully!');
       setCancelModal({ show: false, booking: null });
       fetchBookings();
     } catch (error) {
       alert('Error cancelling booking');
-=======
-      alert('Seat cancelled successfully!');
-      setCancelModal({ show: false, booking: null });
-      fetchBookings();
-    } catch (error) {
-      alert('Error cancelling seat');
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     }
   };
 
@@ -269,11 +197,7 @@ const BookingList: React.FC = () => {
           </thead>
           <tbody>
             {bookings.map((booking) => {
-<<<<<<< HEAD
               const finalAmount = booking.custom_amount || booking.total_price || 0;
-=======
-              const finalAmount = booking.custom_amount || booking.calculated_price;
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
               return (
               <tr key={booking.id}>
                 <td style={{ padding: '12px', border: '1px solid #ddd' }}>
@@ -291,7 +215,6 @@ const BookingList: React.FC = () => {
                   }
                 </td>
                 <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-<<<<<<< HEAD
                   {booking.onward_seat_number || booking.return_seat_number ? (
                     <div>
                       {booking.onward_seat_number && (
@@ -303,15 +226,6 @@ const BookingList: React.FC = () => {
                     </div>
                   ) : (
                     <span style={{ color: '#999' }}>No seats assigned</span>
-=======
-                  {booking.seat_number ? (
-                    <div>
-                      <strong>Seat:</strong> {booking.seat_number}<br/>
-                      <small>Bus: {booking.bus_details?.bus_number || 'TBD'}</small>
-                    </div>
-                  ) : (
-                    <span style={{ color: '#999' }}>No seat</span>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                   )}
                 </td>
                 <td style={{ padding: '12px', border: '1px solid #ddd' }}>
@@ -392,11 +306,7 @@ const BookingList: React.FC = () => {
                     >
                       💰 Payment
                     </button>
-<<<<<<< HEAD
                     {booking.status === 'Active' && (
-=======
-                    {booking.seat_number && (
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                       <button
                         onClick={() => openCancelModal(booking)}
                         style={{
@@ -450,11 +360,7 @@ const BookingList: React.FC = () => {
           }}>
             <h3>Record Payment</h3>
             <p><strong>Passenger:</strong> {paymentModal.booking?.passenger_details.name}</p>
-<<<<<<< HEAD
             <p><strong>Total Price:</strong> ₹{paymentModal.booking?.total_price || 0}</p>
-=======
-            <p><strong>Calculated Price:</strong> ₹{paymentModal.booking?.calculated_price}</p>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
             
             <form onSubmit={handlePaymentSubmit}>
               <div style={{ marginBottom: '15px' }}>
@@ -493,7 +399,6 @@ const BookingList: React.FC = () => {
               </div>
 
               <div style={{ marginBottom: '15px' }}>
-<<<<<<< HEAD
                 <label>Collected By:</label>
                 <input
                   type="text"
@@ -503,31 +408,6 @@ const BookingList: React.FC = () => {
                   required
                   style={{ width: '100%', padding: '8px', marginTop: '5px' }}
                 />
-=======
-                <label>Collected By (Volunteer):</label>
-                <select
-                  value={paymentData.collected_by}
-                  onChange={(e) => setPaymentData(prev => ({ ...prev, collected_by: e.target.value }))}
-                  required
-                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                >
-                  <option value="">Select volunteer</option>
-                  {volunteers.map((volunteer) => (
-                    <option key={volunteer.id} value={volunteer.name}>
-                      {volunteer.name}
-                    </option>
-                  ))}
-                  <option value="Other">Other (Manual Entry)</option>
-                </select>
-                {paymentData.collected_by === 'Other' && (
-                  <input
-                    type="text"
-                    placeholder="Enter volunteer name"
-                    onChange={(e) => setPaymentData(prev => ({ ...prev, collected_by: e.target.value }))}
-                    style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                  />
-                )}
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
@@ -585,7 +465,6 @@ const BookingList: React.FC = () => {
             width: '400px',
             maxWidth: '90%'
           }}>
-<<<<<<< HEAD
             <h3>Cancel Booking</h3>
             <p><strong>Passenger:</strong> {cancelModal.booking?.passenger_details.name}</p>
             {(cancelModal.booking?.onward_seat_number || cancelModal.booking?.return_seat_number) && (
@@ -600,14 +479,6 @@ const BookingList: React.FC = () => {
             )}
             
             <form onSubmit={handleBookingCancellation}>
-=======
-            <h3>Cancel Seat Allocation</h3>
-            <p><strong>Passenger:</strong> {cancelModal.booking?.passenger_details.name}</p>
-            <p><strong>Seat:</strong> {cancelModal.booking?.seat_number}</p>
-            <p><strong>Bus:</strong> {cancelModal.booking?.bus_details?.bus_number}</p>
-            
-            <form onSubmit={handleSeatCancellation}>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
               <div style={{ marginBottom: '15px' }}>
                 <label>Cancellation Reason:</label>
                 <select
@@ -670,11 +541,7 @@ const BookingList: React.FC = () => {
                     cursor: 'pointer'
                   }}
                 >
-<<<<<<< HEAD
                   Cancel Booking
-=======
-                  Cancel Seat
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                 </button>
               </div>
             </form>

@@ -5,7 +5,6 @@ interface Bus {
   bus_number: string;
   capacity: number;
   route_name: string;
-<<<<<<< HEAD
   journey_details?: {
     id: number;
     journey_type: 'ONWARD' | 'RETURN';
@@ -18,23 +17,16 @@ interface Journey {
   journey_type: 'ONWARD' | 'RETURN';
   journey_date: string;
   is_active: boolean;
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 }
 
 const BusManager: React.FC = () => {
   const [buses, setBuses] = useState<Bus[]>([]);
-<<<<<<< HEAD
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [newBus, setNewBus] = useState({ bus_number: '', route_name: '', journey: '' });
-=======
-  const [newBus, setNewBus] = useState({ bus_number: '', route_name: '' });
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchBuses();
-<<<<<<< HEAD
     fetchJourneys();
   }, []);
 
@@ -56,17 +48,6 @@ const BusManager: React.FC = () => {
     } catch (error) {
       console.error('Error fetching buses:', error);
       setBuses([]);
-=======
-  }, []);
-
-  const fetchBuses = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`);
-      const data = await response.json();
-      setBuses(data);
-    } catch (error) {
-      console.error('Error fetching buses:', error);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     }
   };
 
@@ -78,7 +59,6 @@ const BusManager: React.FC = () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`, {
         method: 'POST',
-<<<<<<< HEAD
         headers: { 
           'Content-Type': 'application/json'
         },
@@ -93,14 +73,6 @@ const BusManager: React.FC = () => {
 
       if (response.ok) {
         setNewBus({ bus_number: '', route_name: '', journey: '' });
-=======
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newBus, capacity: 40 })
-      });
-
-      if (response.ok) {
-        setNewBus({ bus_number: '', route_name: '' });
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         fetchBuses();
         alert('Bus added successfully!');
       } else {
@@ -119,12 +91,8 @@ const BusManager: React.FC = () => {
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/${id}/`, {
-<<<<<<< HEAD
         method: 'DELETE',
         credentials: 'include'
-=======
-        method: 'DELETE'
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
       });
 
       if (response.ok) {
@@ -175,7 +143,6 @@ const BusManager: React.FC = () => {
               style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
             />
           </div>
-<<<<<<< HEAD
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Journey: <span style={{ color: 'red' }}>*</span>
@@ -194,8 +161,6 @@ const BusManager: React.FC = () => {
               ))}
             </select>
           </div>
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
           <button
             type="submit"
             disabled={loading}
@@ -231,14 +196,11 @@ const BusManager: React.FC = () => {
                 <p style={{ margin: '0 0 5px 0', color: '#666' }}>
                   <strong>Capacity:</strong> {bus.capacity} seats
                 </p>
-<<<<<<< HEAD
                 {bus.journey_details && (
                   <p style={{ margin: '0 0 5px 0', color: '#666' }}>
                     <strong>Journey:</strong> {bus.journey_details.journey_type} - {new Date(bus.journey_details.journey_date).toLocaleDateString('en-IN')}
                   </p>
                 )}
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                 {bus.route_name && (
                   <p style={{ margin: '0 0 15px 0', color: '#666' }}>
                     <strong>Route:</strong> {bus.route_name}

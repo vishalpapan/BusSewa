@@ -27,34 +27,17 @@ interface Booking {
   status: string;
 }
 
-<<<<<<< HEAD
 interface PassengerListProps {
   onNavigate?: (tab: string, passengerId?: number) => void;
 }
 
 const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
-=======
-const PassengerList: React.FC = () => {
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pickupPoints, setPickupPoints] = useState<PickupPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-<<<<<<< HEAD
 
-=======
-  const [bookingModal, setBookingModal] = useState<{ show: boolean; passenger: Passenger | null }>({
-    show: false,
-    passenger: null
-  });
-  const [bookingData, setBookingData] = useState({
-    onwards_date: '',
-    return_date: '',
-    pickup_point: '',
-    remarks: '',
-  });
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
   const fetchPassengers = async () => {
     try {
@@ -122,45 +105,12 @@ const PassengerList: React.FC = () => {
   };
 
   const openBookingModal = (passenger: Passenger) => {
-<<<<<<< HEAD
     if (onNavigate) {
       onNavigate('booking', passenger.id);
     }
   };
 
 
-=======
-    setBookingModal({ show: true, passenger });
-    setBookingData({
-      onwards_date: '',
-      return_date: '',
-      pickup_point: '',
-      remarks: '',
-    });
-  };
-
-  const closeBookingModal = () => {
-    setBookingModal({ show: false, passenger: null });
-  };
-
-  const handleBookingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bookingModal.passenger) return;
-
-    try {
-      await bookingAPI.create({
-        passenger: bookingModal.passenger.id,
-        ...bookingData,
-      });
-      const price = calculatePrice(bookingModal.passenger.age_criteria);
-      alert(`Booking created successfully! Price: ₹${price}`);
-      closeBookingModal();
-      fetchBookings(); // Refresh bookings
-    } catch (error: any) {
-      alert('Error creating booking: ' + (error.message || 'Unknown error'));
-    }
-  };
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '20px' }}>Loading passengers...</div>;
@@ -283,116 +233,7 @@ const PassengerList: React.FC = () => {
         </div>
       )}
 
-<<<<<<< HEAD
 
-=======
-      {/* Quick Booking Modal */}
-      {bookingModal.show && bookingModal.passenger && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            width: '500px',
-            maxWidth: '90%'
-          }}>
-            <h3>Create Booking</h3>
-            <p><strong>Passenger:</strong> {bookingModal.passenger.name}</p>
-            <p><strong>Price:</strong> ₹{calculatePrice(bookingModal.passenger.age_criteria)}</p>
-            
-            <form onSubmit={handleBookingSubmit}>
-              <div style={{ marginBottom: '15px' }}>
-                <label>Onwards Date:</label>
-                <input
-                  type="date"
-                  value={bookingData.onwards_date}
-                  onChange={(e) => setBookingData(prev => ({ ...prev, onwards_date: e.target.value }))}
-                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '15px' }}>
-                <label>Return Date:</label>
-                <input
-                  type="date"
-                  value={bookingData.return_date}
-                  onChange={(e) => setBookingData(prev => ({ ...prev, return_date: e.target.value }))}
-                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '15px' }}>
-                <label>Pickup Point:</label>
-                <select
-                  value={bookingData.pickup_point}
-                  onChange={(e) => setBookingData(prev => ({ ...prev, pickup_point: e.target.value }))}
-                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                >
-                  <option value="">Select pickup point</option>
-                  {pickupPoints.map((point) => (
-                    <option key={point.id} value={point.id}>
-                      {point.name} - {point.location}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ marginBottom: '15px' }}>
-                <label>Remarks:</label>
-                <textarea
-                  value={bookingData.remarks}
-                  onChange={(e) => setBookingData(prev => ({ ...prev, remarks: e.target.value }))}
-                  rows={2}
-                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                  placeholder="Any special notes..."
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={closeBookingModal}
-                  style={{
-                    backgroundColor: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Create Booking
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     </div>
   );
 };

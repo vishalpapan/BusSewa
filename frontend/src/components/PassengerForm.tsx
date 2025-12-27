@@ -9,10 +9,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
     gender: '',
-<<<<<<< HEAD
     age: '',
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     age_criteria: '',
     category: '',
     mobile_no: '',
@@ -27,7 +24,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
 
   const [loading, setLoading] = useState(false);
 
-<<<<<<< HEAD
   const calculateAgeCriteria = (age: number, gender: string) => {
     if (!age || !gender) return '';
     
@@ -48,8 +44,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
     return requiredCategories.includes(ageCriteria);
   };
 
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   useEffect(() => {
     fetchPassengers();
   }, []);
@@ -66,7 +60,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-<<<<<<< HEAD
     
     const newValue = type === 'checkbox' ? checked : value;
     const updatedData = { ...formData, [name]: newValue };
@@ -79,12 +72,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
     }
     
     setFormData(updatedData);
-=======
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,10 +101,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
       setFormData({
         name: '',
         gender: '',
-<<<<<<< HEAD
         age: '',
-=======
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         age_criteria: '',
         category: '',
         mobile_no: '',
@@ -169,7 +153,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
         </div>
 
         <div style={{ marginBottom: '15px' }}>
-<<<<<<< HEAD
           <label>Age:</label>
           <input
             type="number"
@@ -200,24 +183,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
           <small style={{ color: '#666', fontSize: '12px' }}>
             Automatically calculated based on age and gender
           </small>
-=======
-          <label>Age Criteria:</label>
-          <select
-            name="age_criteria"
-            value={formData.age_criteria}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          >
-            <option value="">Select Age Criteria</option>
-            <option value="M-12 & Below">Male - 12 & Below</option>
-            <option value="M-Above 12 & Below 65">Male - Above 12 & Below 65</option>
-            <option value="M-65 & Above">Male - 65 & Above</option>
-            <option value="F-12 & Below">Female - 12 & Below</option>
-            <option value="F-Above 12 & Below 75">Female - Above 12 & Below 75</option>
-            <option value="M&F-75 & Above">Male & Female - 75 & Above</option>
-          </select>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         </div>
 
         <div style={{ marginBottom: '15px' }}>
@@ -248,11 +213,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
         </div>
 
         <div style={{ marginBottom: '15px' }}>
-<<<<<<< HEAD
           <label>Aadhar Number {isAadharRequired(formData.age_criteria) ? '(Required)' : '(Optional)'}:</label>
-=======
-          <label>Aadhar Number:</label>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
           <input
             type="text"
             name="aadhar_number"
@@ -260,7 +221,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
             onChange={handleChange}
             placeholder="Enter 12-digit Aadhar number"
             maxLength={12}
-<<<<<<< HEAD
             required={isAadharRequired(formData.age_criteria)}
             style={{ 
               width: '100%', 
@@ -274,12 +234,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
               ? '⚠️ Aadhar number is mandatory for this age category'
               : 'Optional: 12-digit Aadhar number (numbers only)'
             }
-=======
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-          <small style={{ color: '#666', fontSize: '12px' }}>
-            Optional: 12-digit Aadhar number (numbers only)
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
           </small>
         </div>
 

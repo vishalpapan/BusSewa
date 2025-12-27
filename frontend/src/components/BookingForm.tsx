@@ -13,7 +13,6 @@ interface PickupPoint {
   location: string;
 }
 
-<<<<<<< HEAD
 interface Journey {
   id: number;
   journey_type: 'ONWARD' | 'RETURN';
@@ -35,33 +34,20 @@ const BookingForm: React.FC = () => {
     journey_type: 'BOTH' as 'ONWARD' | 'RETURN' | 'BOTH',
     onward_journey: '',
     return_journey: '',
-=======
-const BookingForm: React.FC = () => {
-  const [formData, setFormData] = useState({
-    passenger: '',
-    onwards_date: '',
-    return_date: '',
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     pickup_point: '',
     remarks: '',
   });
 
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [pickupPoints, setPickupPoints] = useState<PickupPoint[]>([]);
-<<<<<<< HEAD
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [pricing, setPricing] = useState<JourneyPricing[]>([]);
   const [loading, setLoading] = useState(false);
   const [calculatedPrice, setCalculatedPrice] = useState({ onward: 0, return: 0, total: 0 });
-=======
-  const [loading, setLoading] = useState(false);
-  const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
   useEffect(() => {
     fetchPassengers();
     fetchPickupPoints();
-<<<<<<< HEAD
     fetchJourneys();
     fetchPricing();
   }, []);
@@ -86,10 +72,6 @@ const BookingForm: React.FC = () => {
     }
   };
 
-=======
-  }, []);
-
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   const fetchPassengers = async () => {
     try {
       const response = await passengerAPI.getAll();
@@ -108,7 +90,6 @@ const BookingForm: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
   const calculateJourneyPrice = (journeyType: 'ONWARD' | 'RETURN', passengerId: string) => {
     const passenger = passengers.find(p => p.id.toString() === passengerId);
     if (!passenger) return 0;
@@ -145,40 +126,12 @@ const BookingForm: React.FC = () => {
     updatePricing();
   }, [formData.passenger, formData.journey_type, passengers, pricing]);
 
-=======
-  const calculatePrice = (passengerId: string) => {
-    const passenger = passengers.find(p => p.id.toString() === passengerId);
-    if (!passenger) return 0;
-
-    const ageCriteria = passenger.age_criteria;
-    
-    if (ageCriteria.includes('M-12 & Below') || ageCriteria.includes('F-12 & Below')) {
-      return 290; // Child price
-    } else if (ageCriteria.includes('M-65 & Above') || ageCriteria.includes('F-Above 12 & Below 75')) {
-      return 290; // Senior/Female price
-    } else if (ageCriteria.includes('M&F-75 & Above')) {
-      return 0; // Free for 75+
-    } else {
-      return 550; // Adult male price
-    }
-  };
-
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-<<<<<<< HEAD
-=======
-
-    // Calculate price when passenger is selected
-    if (name === 'passenger' && value) {
-      const price = calculatePrice(value);
-      setCalculatedPrice(price);
-    }
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -187,7 +140,6 @@ const BookingForm: React.FC = () => {
     
     try {
       await bookingAPI.create(formData);
-<<<<<<< HEAD
       alert(`Booking created successfully! Total Price: ₹${calculatedPrice.total}`);
       setFormData({
         passenger: '',
@@ -198,17 +150,6 @@ const BookingForm: React.FC = () => {
         remarks: '',
       });
       setCalculatedPrice({ onward: 0, return: 0, total: 0 });
-=======
-      alert(`Booking created successfully! Price: ₹${calculatedPrice}`);
-      setFormData({
-        passenger: '',
-        onwards_date: '',
-        return_date: '',
-        pickup_point: '',
-        remarks: '',
-      });
-      setCalculatedPrice(0);
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     } catch (error: any) {
       alert('Error creating booking: ' + (error.message || 'Unknown error'));
     } finally {
@@ -244,7 +185,6 @@ const BookingForm: React.FC = () => {
         {selectedPassenger && (
           <div style={{ 
             marginBottom: '15px', 
-<<<<<<< HEAD
             padding: '15px', 
             backgroundColor: '#e7f3ff', 
             borderRadius: '4px' 
@@ -259,20 +199,11 @@ const BookingForm: React.FC = () => {
             <div style={{ fontWeight: 'bold', marginTop: '5px', fontSize: '16px' }}>
               Total Price: Rs.{(calculatedPrice.total || 0).toFixed(2)}
             </div>
-=======
-            padding: '10px', 
-            backgroundColor: '#e7f3ff', 
-            borderRadius: '4px' 
-          }}>
-            <strong>Calculated Price: ₹{calculatedPrice}</strong>
-            <br />
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
             <small>Based on age criteria: {selectedPassenger.age_criteria}</small>
           </div>
         )}
 
         <div style={{ marginBottom: '15px' }}>
-<<<<<<< HEAD
           <label>Journey Selection:</label>
           <select
             name="journey_type"
@@ -326,28 +257,6 @@ const BookingForm: React.FC = () => {
             </select>
           </div>
         )}
-=======
-          <label>Onwards Date:</label>
-          <input
-            type="date"
-            name="onwards_date"
-            value={formData.onwards_date}
-            onChange={handleChange}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Return Date:</label>
-          <input
-            type="date"
-            name="return_date"
-            value={formData.return_date}
-            onChange={handleChange}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
         <div style={{ marginBottom: '15px' }}>
           <label>Pickup Point:</label>
@@ -390,11 +299,7 @@ const BookingForm: React.FC = () => {
             cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
-<<<<<<< HEAD
           {loading ? 'Creating Booking...' : `Create Booking (Rs.${(calculatedPrice.total || 0).toFixed(2)})`}
-=======
-          {loading ? 'Creating Booking...' : `Create Booking (₹${calculatedPrice})`}
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         </button>
       </form>
     </div>
