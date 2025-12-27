@@ -9,7 +9,6 @@ class PickupPoint(models.Model):
     def __str__(self):
         return self.name
 
-<<<<<<< HEAD
 class Journey(models.Model):
     JOURNEY_TYPES = [
         ('ONWARD', 'Onward Journey'),
@@ -68,16 +67,6 @@ class Bus(models.Model):
     
     def __str__(self):
         return f"Bus {self.bus_number or 'TBD'} - {self.journey}"
-=======
-class Bus(models.Model):
-    bus_number = models.CharField(max_length=20, blank=True)
-    capacity = models.IntegerField(default=40)
-    route_name = models.CharField(max_length=100, blank=True)
-    assigned_volunteer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_buses', help_text='Volunteer responsible for this bus')
-    
-    def __str__(self):
-        return f"Bus {self.bus_number or 'TBD'} - {self.capacity} seats"
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
 class Booking(models.Model):
     STATUS_CHOICES = [
@@ -86,7 +75,6 @@ class Booking(models.Model):
         ('Completed', 'Completed'),
     ]
     
-<<<<<<< HEAD
     JOURNEY_SELECTION = [
         ('ONWARD', 'Onward Only'),
         ('RETURN', 'Return Only'),
@@ -115,52 +103,14 @@ class Booking(models.Model):
     return_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     custom_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-=======
-    # Passenger Info
-    passenger = models.ForeignKey(Passenger, on_delete=models.CASCADE)
-    
-    # Journey Details
-    onwards_date = models.DateField(null=True, blank=True)
-    return_date = models.DateField(null=True, blank=True)
-    pickup_point = models.ForeignKey(PickupPoint, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    # Bus Assignment (flexible)
-    assigned_bus = models.ForeignKey(Bus, on_delete=models.SET_NULL, null=True, blank=True)
-    seat_number = models.CharField(max_length=10, blank=True, default='', help_text='Seat number (1-40)')
-    bus_number = models.CharField(max_length=20, blank=True, default='', help_text='Actual bus registration number')
-    departure_time = models.TimeField(null=True, blank=True, default=None)
-    
-    # Pricing
-    calculated_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    custom_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Custom booking amount (overrides calculated price)')
-    amount_updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='amount_updates')
-    amount_updated_at = models.DateTimeField(null=True, blank=True)
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     
     # Status & Tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
     payment_status = models.CharField(max_length=20, choices=[('Paid', 'Paid'), ('Pending', 'Pending'), ('Partial', 'Partial')], default='Pending')
-<<<<<<< HEAD
     allow_unpaid_allocation = models.BooleanField(default=False)
     
     # Volunteer Assignment
     assigned_volunteer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_bookings')
-=======
-    allow_unpaid_allocation = models.BooleanField(default=False, help_text='Allow seat allocation even if payment is pending')
-    
-    # SMS/WhatsApp Notifications
-    sms_sent = models.BooleanField(default=False, blank=True)
-    sms_sent_at = models.DateTimeField(null=True, blank=True, default=None)
-    whatsapp_sent = models.BooleanField(default=False, blank=True)
-    whatsapp_sent_at = models.DateTimeField(null=True, blank=True, default=None)
-    
-    # Data Capture Info
-    data_captured_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    data_captured_date = models.DateField(auto_now_add=True)
-    
-    # Volunteer Assignment
-    assigned_volunteer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_bookings', help_text='Volunteer responsible for this passenger')
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     
     # Remarks
     remarks = models.TextField(blank=True)
@@ -170,7 +120,6 @@ class Booking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def save(self, *args, **kwargs):
-<<<<<<< HEAD
         # Auto-calculate prices
         if not self.onward_price and self.onward_journey:
             self.onward_price = self.calculate_journey_price('ONWARD')
@@ -210,68 +159,6 @@ class Booking(models.Model):
     
     class Meta:
         ordering = ['-created_at']
-=======
-        # Auto-calculate price based on age criteria
-        if not self.calculated_price:
-            self.calculated_price = self.calculate_price()
-        super().save(*args, **kwargs)
-    
-    def calculate_price(self):
-        """Calculate price based on passenger age criteria"""
-        age_criteria = self.passenger.age_criteria
-        
-        # Base prices
-        if 'M-12 & Below' in age_criteria or 'F-12 & Below' in age_criteria:
-            return 290.00  # Child price
-        elif 'M-65 & Above' in age_criteria or 'F-Above 12 & Below 75' in age_criteria:
-            return 290.00  # Senior/Female price
-        elif 'M&F-75 & Above' in age_criteria:
-            return 0.00    # Free for 75+
-        else:
-            return 550.00  # Adult male price
-    
-    def get_final_amount(self):
-        """Get the final booking amount (custom or calculated)"""
-        return self.custom_amount if self.custom_amount is not None else self.calculated_price
-    
-    def update_custom_amount(self, amount, updated_by):
-        """Update custom amount with tracking"""
-        from django.utils import timezone
-        self.custom_amount = amount
-        self.amount_updated_by = updated_by
-        self.amount_updated_at = timezone.now()
-        self.save()
-    
-    def __str__(self):
-        return f"{self.passenger.name} - {self.onwards_date}"
-    
-    class Meta:
-        ordering = ['-created_at']
-        
-    def cancel_seat(self, cancelled_by, reason='Passenger Request', refund_amount=0, notes=''):
-        """Cancel seat allocation and preserve data"""
-        from .models import SeatCancellation
-        
-        # Create cancellation record
-        cancellation = SeatCancellation.objects.create(
-            booking=self,
-            cancelled_by=cancelled_by,
-            reason=reason,
-            refund_amount=refund_amount,
-            notes=notes,
-            original_seat_number=self.seat_number,
-            original_bus_number=self.bus_number,
-            original_amount_paid=sum(p.amount for p in self.payment_set.all())
-        )
-        
-        # Clear seat allocation but keep booking
-        self.seat_number = ''
-        self.assigned_bus = None
-        self.status = 'Cancelled'
-        self.save()
-        
-        return cancellation
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
 
 class Payment(models.Model):
     PAYMENT_METHODS = [
@@ -285,14 +172,8 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='Cash')
     collected_by = models.CharField(max_length=50, blank=True)
     payment_date = models.DateTimeField(auto_now_add=True)
-<<<<<<< HEAD
     payment_received_date = models.DateField(null=True, blank=True)
     
-=======
-    payment_received_date = models.DateField(null=True, blank=True, help_text='Actual date when payment was received')
-    
-    # Timestamps
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -311,16 +192,11 @@ class SeatCancellation(models.Model):
     cancelled_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     cancellation_date = models.DateTimeField(auto_now_add=True)
     reason = models.CharField(max_length=50, choices=CANCELLATION_REASONS, default='Passenger Request')
-<<<<<<< HEAD
     refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-=======
-    refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text='Amount to be refunded')
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     refund_processed = models.BooleanField(default=False)
     refund_date = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
     
-<<<<<<< HEAD
     # Journey-specific cancellation
     journey_type = models.CharField(max_length=10, choices=[('ONWARD', 'Onward'), ('RETURN', 'Return'), ('BOTH', 'Both')], null=True, blank=True)
     original_onward_seat = models.CharField(max_length=10, blank=True)
@@ -329,12 +205,3 @@ class SeatCancellation(models.Model):
     
     def __str__(self):
         return f"Cancelled: {self.booking.passenger.name} - {self.journey_type}"
-=======
-    # Preserve original booking data
-    original_seat_number = models.CharField(max_length=10, blank=True)
-    original_bus_number = models.CharField(max_length=20, blank=True)
-    original_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
-    def __str__(self):
-        return f"Cancelled: {self.booking.passenger.name} - Seat {self.original_seat_number}"
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
