@@ -20,21 +20,45 @@ A journey-based bus booking and passenger management system built with Django RE
 
 ## Quick Start
 
+### Prerequisites
+- Python 3.8+
+- Node.js 16+
+- Git
+
 ### Backend Setup
+
+#### Windows
 ```bash
 cd backend
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python create_simple_admin.py
 python manage.py runserver
 ```
 
-### Frontend Setup
+#### Linux/Mac
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python create_simple_admin.py
+python manage.py runserver
+```
+
+### Frontend Setup (All Platforms)
 ```bash
 cd frontend
 npm install
 npm start
 ```
+
+### Access Application
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
 
 ## Default Login
 **Username**: admin
