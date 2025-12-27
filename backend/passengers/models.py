@@ -2,10 +2,6 @@ from django.db import models
 from .validators import validate_document_file, validate_aadhar_number
 
 def passenger_document_path(instance, filename):
-<<<<<<< HEAD
-=======
-    # Generate secure filename: passenger_ID_timestamp.extension
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     import time
     import os
     ext = os.path.splitext(filename)[1]
@@ -42,17 +38,11 @@ class Passenger(models.Model):
     # Basic Info
     name = models.CharField(max_length=100)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-<<<<<<< HEAD
     age = models.IntegerField(help_text='Age in years', null=True, blank=True)
     age_criteria = models.CharField(max_length=50, choices=AGE_CATEGORIES)
     mobile_no = models.CharField(max_length=15, blank=True)
     aadhar_number = models.CharField(max_length=12, blank=True, validators=[validate_aadhar_number], help_text='12-digit Aadhar number')
     aadhar_required = models.BooleanField(default=False, help_text='Auto-calculated based on age criteria')
-=======
-    age_criteria = models.CharField(max_length=50, choices=AGE_CATEGORIES)
-    mobile_no = models.CharField(max_length=15, blank=True)
-    aadhar_number = models.CharField(max_length=12, blank=True, validators=[validate_aadhar_number], help_text='12-digit Aadhar number')
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     
     # Family/Group Travel
     related_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name='family_members')
@@ -77,7 +67,6 @@ class Passenger(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-<<<<<<< HEAD
     def calculate_age_criteria(self):
         """Auto-calculate age criteria based on age and gender"""
         if self.gender == 'M':
@@ -120,22 +109,10 @@ class Passenger(models.Model):
         
         # Auto-set verification status
         if self.aadhar_required:
-=======
-    def requires_verification(self):
-        """Check if passenger needs document verification for concession"""
-        return ('65 & Above' in self.age_criteria or 
-                '75 & Above' in self.age_criteria or 
-                '12 & Below' in self.age_criteria)
-    
-    def save(self, *args, **kwargs):
-        # Auto-set verification status based on age criteria
-        if self.requires_verification():
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
             if self.verification_status == 'Not Required':
                 self.verification_status = 'Pending'
         else:
             self.verification_status = 'Not Required'
-<<<<<<< HEAD
         
         super().save(*args, **kwargs)
     
@@ -150,12 +127,6 @@ class Passenger(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.category} (Age: {self.age})"
-=======
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return f"{self.name} - {self.category}"
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
     
     class Meta:
         ordering = ['name']
