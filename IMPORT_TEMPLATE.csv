@@ -1,0 +1,7 @@
+name,gender,age,mobile_no,aadhar_number,category,journey_type,onward_journey_date,return_journey_date,pickup_point_name,pickup_point_location,remarks,related_to_name,relationship
+Ramesh Kumar,M,45,9876543210,123456789012,Satsang,BOTH,2024-12-20,2024-12-22,Main Gate,Temple Main Entrance,VIP Guest,,,
+Sita Devi,F,42,9876543211,123456789013,Satsang,BOTH,2024-12-20,2024-12-22,Main Gate,Temple Main Entrance,,Ramesh Kumar,Spouse
+Arjun Kumar,M,8,9876543212,123456789014,Bal Sewadal,BOTH,2024-12-20,2024-12-22,Main Gate,Temple Main Entrance,,Ramesh Kumar,Son
+Lakshmi Sharma,F,68,9876543213,123456789015,Sewadal,ONWARD,2024-12-20,,Side Gate,Temple Side Entrance,Senior Citizen,,,
+Mohan Gupta,M,76,9876543214,123456789016,Satsang,RETURN,,2024-12-22,Main Gate,Temple Main Entrance,75+ Category,,,
+Priya Singh,F,25,9876543215,,Satsang,BOTH,2024-12-20,2024-12-22,Main Gate,Temple Main Entrance,Young Adult,,,

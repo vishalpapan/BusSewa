@@ -1,0 +1,73 @@
+<<<<<<< HEAD
+# Backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+db.sqlite3
+media/
+.env
+*.log
+migrations/__pycache__/
+
+# Frontend
+node_modules/
+build/
+.env.local
+.env.production.local
+=======
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+
+# Node.js
+node_modules/
+>>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+<<<<<<< HEAD
+=======
+# React build
+build/
+dist/
+
+>>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+<<<<<<< HEAD
+# Production
+static/
+collected_static/
+=======
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+>>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
