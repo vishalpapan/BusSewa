@@ -37,35 +37,22 @@ class BookingViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=['post'])
-<<<<<<< HEAD
     def cancel_booking(self, request, pk=None):
         """Cancel entire booking with data preservation"""
-=======
-    def cancel_seat(self, request, pk=None):
-        """Cancel seat allocation with data preservation"""
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
         booking = self.get_object()
         reason = request.data.get('reason', 'Passenger Request')
         refund_amount = request.data.get('refund_amount', 0)
         notes = request.data.get('notes', '')
         
         try:
-<<<<<<< HEAD
             cancellation = booking.cancel_booking(
-=======
-            cancellation = booking.cancel_seat(
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                 cancelled_by=None,  # TODO: Add user when auth is ready
                 reason=reason,
                 refund_amount=float(refund_amount),
                 notes=notes
             )
             return Response({
-<<<<<<< HEAD
                 'message': 'Booking cancelled successfully',
-=======
-                'message': 'Seat cancelled successfully',
->>>>>>> 9b2160aff06b2f4bae5dc4f518d19142922e4498
                 'cancellation_id': cancellation.id
             })
         except Exception as e:
