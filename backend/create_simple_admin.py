@@ -17,13 +17,13 @@ except:
 
 # Create simple admin user
 admin = User(
-    username='admin',
+    username='snmworli',
     email='admin@example.com',
     is_superuser=True,
     is_staff=True,
     is_active=True
 )
-admin.set_password('admin123')
+admin.set_password('worli203')
 admin.save()
 
 # Create profile
@@ -36,6 +36,6 @@ except:
     pass
 
 print("✅ Admin user created!")
-print("Username: admin")
-print("Password: admin123")
+print("Username: snmworli")
+print("Password: worli203")
 print("Now restart Django server and login.")
