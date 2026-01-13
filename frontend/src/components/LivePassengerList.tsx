@@ -61,14 +61,14 @@ const LivePassengerList: React.FC = () => {
       ]);
 
       // Fetch buses
-      const busesRes = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`);
+      const busesRes = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/buses/`);
       const busesData = await busesRes.json();
       setBuses(busesData);
-      
+
       const enrichedPassengers = passengersRes.data.map((passenger: any) => {
         const booking = bookingsRes.data.find((b: any) => b.passenger_details?.id === passenger.id || b.passenger === passenger.id);
         const payment = paymentsRes.data.find((p: any) => p.booking === booking?.id);
-        
+
         return {
           ...passenger,
           booking,
@@ -89,13 +89,13 @@ const LivePassengerList: React.FC = () => {
       alert('No booking to cancel');
       return;
     }
-    
+
     const confirmMessage = `Cancel booking for "${passenger.name}"?\n\nThis will:\n- Cancel the booking\n- Free up the seat\n- Preserve all data for records`;
-    
+
     if (!window.confirm(confirmMessage)) return;
-    
+
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/bookings/${passenger.booking.id}/cancel_booking/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/bookings/${passenger.booking.id}/cancel_booking/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -104,7 +104,7 @@ const LivePassengerList: React.FC = () => {
           notes: 'Cancelled by volunteer from live passenger list'
         })
       });
-      
+
       if (response.ok) {
         alert('Booking cancelled successfully!');
         fetchAllData();
@@ -122,7 +122,7 @@ const LivePassengerList: React.FC = () => {
     // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(searchLower) ||
         p.mobile_no.includes(searchLower) ||
         p.aadhar_number.includes(searchLower)
@@ -163,7 +163,7 @@ const LivePassengerList: React.FC = () => {
         filtered = filtered.filter(p => !p.payment || parseFloat(p.payment.amount) === 0);
       }
     }
-    
+
     // Seat status filter
     if (filters.seat_status) {
       if (filters.seat_status === 'assigned') {
@@ -172,10 +172,10 @@ const LivePassengerList: React.FC = () => {
         filtered = filtered.filter(p => !p.booking?.onward_seat_number && !p.booking?.return_seat_number);
       }
     }
-    
+
     // Bus number filter
     if (filters.bus_number) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.booking?.onward_bus_details?.bus_number === filters.bus_number ||
         p.booking?.return_bus_details?.bus_number === filters.bus_number
       );
@@ -232,7 +232,7 @@ const LivePassengerList: React.FC = () => {
           {loading ? '🔄 Refreshing...' : '🔄 Refresh'}
         </button>
       </div>
-      
+
       {/* Admin Warning */}
       <div style={{
         backgroundColor: '#fff3cd',
@@ -271,7 +271,7 @@ const LivePassengerList: React.FC = () => {
               style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
             />
           </div>
-          
+
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Category:</label>
             <select
@@ -325,7 +325,7 @@ const LivePassengerList: React.FC = () => {
               <option value="unpaid">Unpaid</option>
             </select>
           </div>
-          
+
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Seat Status:</label>
             <select
@@ -338,7 +338,7 @@ const LivePassengerList: React.FC = () => {
               <option value="unassigned">No Seat</option>
             </select>
           </div>
-          
+
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Bus Number:</label>
             <select
@@ -455,8 +455,8 @@ const LivePassengerList: React.FC = () => {
                     </div>
                   </td>
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                    {passenger.booking?.total_price ? `₹${passenger.booking.total_price}` : 
-                     passenger.payment ? `₹${parseFloat(passenger.payment.amount).toFixed(2)}` : '-'}
+                    {passenger.booking?.total_price ? `₹${passenger.booking.total_price}` :
+                      passenger.payment ? `₹${parseFloat(passenger.payment.amount).toFixed(2)}` : '-'}
                   </td>
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                     <span style={{
@@ -493,7 +493,7 @@ const LivePassengerList: React.FC = () => {
             })}
           </tbody>
         </table>
-        
+
         {filteredPassengers.length === 0 && (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
             {loading ? 'Loading passengers...' : 'No passengers found matching the filters.'}

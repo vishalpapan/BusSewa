@@ -89,7 +89,6 @@ class Passenger(models.Model):
     def calculate_aadhar_required(self):
         """Check if Aadhar is required based on age criteria"""
         required_categories = [
-            'M-12 & Below', 'F-12 & Below',
             'M-65 & Above',
             'M&F-75 & Above'
         ]

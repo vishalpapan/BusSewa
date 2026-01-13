@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-export const API_BASE_URL = 'http://127.0.0.1:8000';
-const API_URL = 'http://127.0.0.1:8000/api';
+// Use relative API URL for production deployment
+export const API_BASE_URL = '/api';
+const API_URL = '/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -10,6 +11,29 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // For session authentication
+});
+
+// Add interceptor to include CSRF token
+api.interceptors.request.use((config) => {
+  const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+  const token = getCookie('csrftoken');
+  if (token) {
+    config.headers['X-CSRFToken'] = token;
+  }
+  return config;
 });
 
 // Passenger API calls

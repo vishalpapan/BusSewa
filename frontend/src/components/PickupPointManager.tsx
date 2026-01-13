@@ -19,7 +19,7 @@ const PickupPointManager: React.FC = () => {
 
   const fetchPickupPoints = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pickup-points/`);
+      const response = await fetch(`${API_BASE_URL}/pickup-points/`);
       if (response.ok) {
         const data = await response.json();
         setPickupPoints(data);
@@ -35,7 +35,7 @@ const PickupPointManager: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pickup-points/`, {
+      const response = await fetch(`${API_BASE_URL}/pickup-points/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ const PickupPointManager: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pickup-points/${editingPoint.id}/`, {
+      const response = await fetch(`${API_BASE_URL}/pickup-points/${editingPoint.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const PickupPointManager: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this pickup point?')) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pickup-points/${id}/`, {
+      const response = await fetch(`${API_BASE_URL}/pickup-points/${id}/`, {
         method: 'DELETE',
       });
 
@@ -96,7 +96,7 @@ const PickupPointManager: React.FC = () => {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h2>Manage Pickup Points</h2>
-      
+
       {/* Add New Pickup Point */}
       <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
         <h3>Add New Pickup Point</h3>
@@ -123,8 +123,8 @@ const PickupPointManager: React.FC = () => {
               style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
             />
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             style={{
               background: loading ? '#ccc' : '#007bff',
@@ -166,8 +166,8 @@ const PickupPointManager: React.FC = () => {
                 style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
               />
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               style={{
                 background: loading ? '#ccc' : '#28a745',
@@ -181,8 +181,8 @@ const PickupPointManager: React.FC = () => {
             >
               {loading ? 'Updating...' : 'Update'}
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setEditingPoint(null)}
               style={{
                 background: '#6c757d',
@@ -211,7 +211,7 @@ const PickupPointManager: React.FC = () => {
                 <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>{point.name}</h4>
                 <p style={{ margin: '0 0 15px 0', color: '#666' }}>{point.location}</p>
                 <div>
-                  <button 
+                  <button
                     onClick={() => setEditingPoint(point)}
                     style={{
                       background: '#28a745',
@@ -226,7 +226,7 @@ const PickupPointManager: React.FC = () => {
                   >
                     Edit
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(point.id!)}
                     style={{
                       background: '#dc3545',

@@ -26,7 +26,7 @@ const UserManagement: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/auth/users/', {
+      const response = await fetch('/api/auth/users/', {
         credentials: 'include'
       });
       if (response.ok) {
@@ -43,7 +43,7 @@ const UserManagement: React.FC = () => {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://127.0.0.1:8000/auth/create_user/', {
+      const response = await fetch('/api/auth/create_user/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -66,7 +66,7 @@ const UserManagement: React.FC = () => {
 
   const toggleUserStatus = async (userId: number) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/users/${userId}/toggle_status/`, {
+      const response = await fetch(`/api/auth/users/${userId}/toggle_status/`, {
         method: 'POST',
         credentials: 'include'
       });

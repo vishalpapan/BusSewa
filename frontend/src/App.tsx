@@ -15,12 +15,14 @@ import BusManager from './components/BusManager';
 import ImportData from './components/ImportData';
 import DeleteManagement from './components/DeleteManagement';
 import JourneyManager from './components/JourneyManager';
+import AttendanceManager from './components/AttendanceManager';
 import { APP_CONFIG } from './config/app.config';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPassengerId, setSelectedPassengerId] = useState<number | null>(null);
 
   useEffect(() => {
     // Set page title
@@ -30,7 +32,7 @@ function App() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/auth/current-user/', {
+      const response = await fetch('/api/auth/current-user/', {
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
@@ -57,7 +59,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://127.0.0.1:8000/auth/logout/', {
+      await fetch('/api/auth/logout/', {
         method: 'POST',
         credentials: 'include'
       });
@@ -89,7 +91,7 @@ function App() {
 
 
   const navButtonStyle = (tabName: string) => ({
-    padding: '8px 16px', 
+    padding: '8px 16px',
     marginRight: '10px',
     backgroundColor: activeTab === tabName ? '#007bff' : '#6c757d',
     color: 'white',
@@ -98,25 +100,30 @@ function App() {
     cursor: 'pointer'
   });
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSelectedPassengerId(null); // Clear selected passenger when manually switching tabs
+  };
+
   return (
     <div className="App">
-      <header style={{ 
+      <header style={{
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '25px 20px', 
+        padding: '25px 20px',
         color: 'white',
         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <h1 style={{ 
-              margin: '0 0 5px 0', 
-              fontSize: '2.2em', 
+            <h1 style={{
+              margin: '0 0 5px 0',
+              fontSize: '2.2em',
               fontWeight: 'bold',
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
             }}>{APP_CONFIG.APP_NAME}</h1>
-            <p style={{ 
-              margin: 0, 
-              fontSize: '1.1em', 
+            <p style={{
+              margin: 0,
+              fontSize: '1.1em',
               opacity: 0.9,
               fontWeight: '300'
             }}>{APP_CONFIG.APP_SUBTITLE}</p>
@@ -140,93 +147,99 @@ function App() {
             </button>
           </div>
         </div>
-        <nav style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
+        <nav style={{
+          display: 'flex',
+          justifyContent: 'center',
           flexWrap: 'wrap',
           gap: '8px'
         }}>
-          <button 
-            onClick={() => setActiveTab('dashboard')}
+          <button
+            onClick={() => handleTabChange('dashboard')}
             style={navButtonStyle('dashboard')}
           >
             📊 Dashboard
           </button>
-          <button 
-            onClick={() => setActiveTab('add')}
+          <button
+            onClick={() => handleTabChange('add')}
             style={navButtonStyle('add')}
           >
             Add Passenger
           </button>
-          <button 
-            onClick={() => setActiveTab('import')}
+          <button
+            onClick={() => handleTabChange('import')}
             style={navButtonStyle('import')}
           >
             📥 Import Data
           </button>
-          <button 
-            onClick={() => setActiveTab('list')}
+          <button
+            onClick={() => handleTabChange('list')}
             style={navButtonStyle('list')}
           >
             View Passengers
           </button>
-          <button 
-            onClick={() => setActiveTab('booking')}
+          <button
+            onClick={() => handleTabChange('booking')}
             style={navButtonStyle('booking')}
           >
             Create Booking
           </button>
-          <button 
-            onClick={() => setActiveTab('bookings')}
+          <button
+            onClick={() => handleTabChange('bookings')}
             style={navButtonStyle('bookings')}
           >
             View Bookings
           </button>
-          <button 
-            onClick={() => setActiveTab('seats')}
+          <button
+            onClick={() => handleTabChange('seats')}
             style={navButtonStyle('seats')}
           >
             🚌 Seat Allocation
           </button>
-          <button 
-            onClick={() => setActiveTab('export')}
+          <button
+            onClick={() => handleTabChange('export')}
             style={navButtonStyle('export')}
           >
             📊 Export Data
           </button>
-          <button 
-            onClick={() => setActiveTab('pickup-points')}
+          <button
+            onClick={() => handleTabChange('pickup-points')}
             style={navButtonStyle('pickup-points')}
           >
             📍 Pickup Points
           </button>
-          <button 
-            onClick={() => setActiveTab('bus-manager')}
+          <button
+            onClick={() => handleTabChange('bus-manager')}
             style={navButtonStyle('bus-manager')}
           >
             🚌 Manage Buses
           </button>
 
-          <button 
-            onClick={() => setActiveTab('google-sheets')}
+          <button
+            onClick={() => handleTabChange('google-sheets')}
             style={navButtonStyle('google-sheets')}
           >
             📊 Google Sheets
           </button>
-          <button 
-            onClick={() => setActiveTab('live-list')}
+          <button
+            onClick={() => handleTabChange('live-list')}
             style={navButtonStyle('live-list')}
           >
             📋 Live List
           </button>
-          <button 
-            onClick={() => setActiveTab('journey-manager')}
+          <button
+            onClick={() => handleTabChange('attendance')}
+            style={navButtonStyle('attendance')}
+          >
+            📋 Attendance
+          </button>
+          <button
+            onClick={() => handleTabChange('journey-manager')}
             style={navButtonStyle('journey-manager')}
           >
             🗓️ Journey Manager
           </button>
-          <button 
-            onClick={() => setActiveTab('delete-management')}
+          <button
+            onClick={() => handleTabChange('delete-management')}
             style={navButtonStyle('delete-management')}
           >
             🗑️ Delete Management
@@ -236,16 +249,32 @@ function App() {
       </header>
       <main>
         {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'add' && <PassengerForm onSuccess={() => setActiveTab('list')} />}
+        {activeTab === 'add' && (
+          <PassengerForm
+            passengerId={selectedPassengerId}
+            onSuccess={() => {
+              setActiveTab('list');
+              setSelectedPassengerId(null);
+            }}
+          />
+        )}
         {activeTab === 'import' && <ImportData />}
-        {activeTab === 'list' && <PassengerList onNavigate={(tab, passengerId) => setActiveTab(tab)} />}
+        {activeTab === 'list' && (
+          <PassengerList
+            onNavigate={(tab, passengerId) => {
+              setActiveTab(tab);
+              if (passengerId) setSelectedPassengerId(passengerId);
+            }}
+          />
+        )}
         {activeTab === 'live-list' && <LivePassengerList />}
-        {activeTab === 'booking' && <BookingForm />}
+        {activeTab === 'booking' && <BookingForm initialPassengerId={selectedPassengerId} />}
         {activeTab === 'bookings' && <BookingList />}
         {activeTab === 'seats' && <SeatAllocation />}
         {activeTab === 'export' && <ExportData />}
         {activeTab === 'pickup-points' && <PickupPointManager />}
         {activeTab === 'bus-manager' && <BusManager />}
+        {activeTab === 'attendance' && <AttendanceManager />}
 
         {activeTab === 'google-sheets' && <GoogleSheetsIntegration />}
         {activeTab === 'journey-manager' && <JourneyManager />}

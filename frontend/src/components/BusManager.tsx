@@ -22,7 +22,7 @@ interface Journey {
 const BusManager: React.FC = () => {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [journeys, setJourneys] = useState<Journey[]>([]);
-  const [newBus, setNewBus] = useState({ bus_number: '', route_name: '', journey: '' });
+  const [newBus, setNewBus] = useState({ bus_number: '', route_name: '', journey: '', capacity: 40 });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const BusManager: React.FC = () => {
 
   const fetchJourneys = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/journeys/`, { credentials: 'include' });
+      const response = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/journeys/`, { credentials: 'include' });
       const data = await response.json();
       setJourneys(Array.isArray(data) ? data.filter((j: Journey) => j.is_active) : []);
     } catch (error) {
@@ -42,7 +42,7 @@ const BusManager: React.FC = () => {
 
   const fetchBuses = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`, { credentials: 'include' });
+      const response = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/buses/`, { credentials: 'include' });
       const data = await response.json();
       setBuses(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -57,22 +57,22 @@ const BusManager: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/buses/`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           bus_number: newBus.bus_number,
-          capacity: 42,
+          capacity: newBus.capacity || 40,
           route_name: newBus.route_name,
           journey: newBus.journey || null
         })
       });
 
       if (response.ok) {
-        setNewBus({ bus_number: '', route_name: '', journey: '' });
+        setNewBus({ bus_number: '', route_name: '', journey: '', capacity: 40 });
         fetchBuses();
         alert('Bus added successfully!');
       } else {
@@ -90,7 +90,7 @@ const BusManager: React.FC = () => {
     if (!window.confirm(`Are you sure you want to delete bus ${busNumber}? This will affect all seat assignments.`)) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/buses/${id}/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/buses/${id}/`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -107,11 +107,11 @@ const BusManager: React.FC = () => {
   return (
     <div style={{ maxWidth: '800px', margin: '20px auto', padding: '20px' }}>
       <h2>🚌 Bus Management</h2>
-      
+
       <div style={{ backgroundColor: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
         <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>⚠️ Important</h3>
         <p style={{ margin: 0, color: '#856404' }}>
-          Bus numbers are used for seat allocation. Only authorized personnel should manage buses. 
+          Bus numbers are used for seat allocation. Only authorized personnel should manage buses.
           Deleting a bus will affect all existing seat assignments.
         </p>
       </div>
@@ -130,6 +130,21 @@ const BusManager: React.FC = () => {
               onChange={(e) => setNewBus({ ...newBus, bus_number: e.target.value })}
               placeholder="e.g., MH-12-AB-1234"
               required
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+            />
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Capacity: <span style={{ color: 'red' }}>*</span>
+            </label>
+            <input
+              type="number"
+              value={newBus.capacity}
+              onChange={(e) => setNewBus({ ...newBus, capacity: parseInt(e.target.value) || 40 })}
+              placeholder="40"
+              required
+              min="1"
+              max="60"
               style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
             />
           </div>

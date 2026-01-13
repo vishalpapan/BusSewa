@@ -52,7 +52,7 @@ const JourneyManager: React.FC = () => {
 
   const fetchJourneys = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/journeys/', { credentials: 'include' });
+      const response = await fetch('/api/journeys/', { credentials: 'include' });
       const data = await response.json();
       setJourneys(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -63,7 +63,7 @@ const JourneyManager: React.FC = () => {
 
   const fetchPricing = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/journey-pricing/', { credentials: 'include' });
+      const response = await fetch('/api/journey-pricing/', { credentials: 'include' });
       const data = await response.json();
       setPricing(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -81,7 +81,7 @@ const JourneyManager: React.FC = () => {
     setLoading(true);
     try {
       console.log('Sending journey data:', newJourney);
-      const response = await fetch('http://127.0.0.1:8000/api/journeys/', {
+      const response = await fetch('/api/journeys/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -122,7 +122,7 @@ const JourneyManager: React.FC = () => {
       let response;
       if (existingPricing) {
         // Update existing pricing
-        response = await fetch(`http://127.0.0.1:8000/api/journey-pricing/${existingPricing.id}/`, {
+        response = await fetch(`/api/journey-pricing/${existingPricing.id}/`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -130,7 +130,7 @@ const JourneyManager: React.FC = () => {
         });
       } else {
         // Create new pricing
-        response = await fetch('http://127.0.0.1:8000/api/journey-pricing/', {
+        response = await fetch('/api/journey-pricing/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -163,7 +163,7 @@ const JourneyManager: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/journeys/${id}/`, {
+      const response = await fetch(`/api/journeys/${id}/`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -182,7 +182,7 @@ const JourneyManager: React.FC = () => {
 
   const toggleJourneyStatus = async (id: number, is_active: boolean) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/journeys/${id}/`, {
+      const response = await fetch(`/api/journeys/${id}/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

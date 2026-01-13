@@ -30,7 +30,7 @@ const DeleteManagement: React.FC = () => {
       const enrichedPassengers = passengersRes.data.map((passenger: any) => {
         const booking = bookingsRes.data.find((b: any) => b.passenger === passenger.id);
         const payment = paymentsRes.data.find((p: any) => p.booking === booking?.id);
-        
+
         return {
           ...passenger,
           booking,
@@ -48,7 +48,7 @@ const DeleteManagement: React.FC = () => {
 
   const handleDeletePassenger = async (passengerId: number, passengerName: string, hasBooking: boolean, hasSeat: boolean) => {
     let confirmMessage = `⚠️ PERMANENT DELETE\n\nDelete passenger "${passengerName}"?`;
-    
+
     if (hasBooking) {
       confirmMessage += '\n\n🚨 WARNING: This passenger has booking records.';
     }
@@ -57,19 +57,19 @@ const DeleteManagement: React.FC = () => {
     }
     confirmMessage += '\n\n❌ This action CANNOT be undone and will DELETE ALL related data:\n- Passenger record\n- Booking records\n- Payment records\n- Seat assignments';
     confirmMessage += '\n\nType "DELETE" to confirm:';
-    
+
     const confirmation = prompt(confirmMessage);
     if (confirmation !== 'DELETE') {
       alert('Delete cancelled - must type "DELETE" exactly');
       return;
     }
-    
+
     setDeleteLoading(passengerId);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/passengers/${passengerId}/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || '/api'}/passengers/${passengerId}/`, {
         method: 'DELETE'
       });
-      
+
       if (response.ok) {
         alert('Passenger deleted permanently!');
         fetchAllData();
@@ -91,7 +91,7 @@ const DeleteManagement: React.FC = () => {
   return (
     <div style={{ maxWidth: '1200px', margin: '20px auto', padding: '20px' }}>
       <h2>🗑️ Delete Management - ADMIN ONLY</h2>
-      
+
       <div style={{
         backgroundColor: '#f8d7da',
         border: '1px solid #f5c6cb',
@@ -101,7 +101,7 @@ const DeleteManagement: React.FC = () => {
       }}>
         <h3 style={{ margin: '0 0 10px 0', color: '#721c24' }}>⚠️ DANGER ZONE</h3>
         <p style={{ margin: 0, color: '#721c24' }}>
-          This section allows PERMANENT deletion of passenger records. 
+          This section allows PERMANENT deletion of passenger records.
           Use with extreme caution as deleted data cannot be recovered.
           Consider using "Cancel Booking" from Live List instead.
         </p>
@@ -125,10 +125,10 @@ const DeleteManagement: React.FC = () => {
               const hasBooking = !!passenger.booking;
               const hasSeat = !!passenger.booking?.seat_number;
               const hasPayment = !!passenger.payment;
-              
+
               let riskLevel = 'Low';
               let riskColor = '#28a745';
-              
+
               if (hasPayment) {
                 riskLevel = 'High';
                 riskColor = '#dc3545';
@@ -139,7 +139,7 @@ const DeleteManagement: React.FC = () => {
                 riskLevel = 'Medium';
                 riskColor = '#ffc107';
               }
-              
+
               return (
                 <tr key={passenger.id} style={{ backgroundColor: index % 2 === 0 ? '#f8f9fa' : 'white' }}>
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
@@ -178,9 +178,9 @@ const DeleteManagement: React.FC = () => {
                   <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                     <button
                       onClick={() => handleDeletePassenger(
-                        passenger.id, 
-                        passenger.name, 
-                        hasBooking, 
+                        passenger.id,
+                        passenger.name,
+                        hasBooking,
                         hasSeat
                       )}
                       disabled={deleteLoading === passenger.id}
@@ -204,14 +204,14 @@ const DeleteManagement: React.FC = () => {
             })}
           </tbody>
         </table>
-        
+
         {passengers.length === 0 && (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
             No passengers found.
           </div>
         )}
       </div>
-      
+
       <div style={{
         marginTop: '20px',
         padding: '15px',

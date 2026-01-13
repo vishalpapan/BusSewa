@@ -112,7 +112,7 @@ const BookingList: React.FC = () => {
   
   const updateBookingAmount = async (bookingId: number, newAmount: string) => {
     try {
-      await fetch(`http://127.0.0.1:8000/api/bookings/${bookingId}/update_amount/`, {
+      await fetch(`/api/bookings/${bookingId}/update_amount/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: parseFloat(newAmount) })
@@ -138,7 +138,7 @@ const BookingList: React.FC = () => {
     if (!cancelModal.booking) return;
     
     try {
-      await fetch(`http://127.0.0.1:8000/api/bookings/${cancelModal.booking.id}/cancel_booking/`, {
+      await fetch(`/api/bookings/${cancelModal.booking.id}/cancel_booking/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cancelData)

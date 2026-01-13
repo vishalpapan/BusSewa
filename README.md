@@ -1,4 +1,4 @@
-# BusSewa - Bus Booking System v2.0
+# BusSewa - Bus Booking System v3.0
 
 A journey-based bus booking and passenger management system built with Django REST Framework and React.
 
@@ -6,10 +6,11 @@ A journey-based bus booking and passenger management system built with Django RE
 
 - Journey-based booking system with separate onward/return management
 - Enhanced passenger registration with age-based criteria
-- 42-seat visual layout with senior citizen priority seating
-- Dynamic pricing based on age criteria and journey type
+- **Dynamic Bus Capacity**: Configurable seat layout (default 40).
+- **Volunteer Management**: Assign volunteers and track their status.
+- **Attendance Tracking**: Mark presence/absence and shift passengers between buses.
+- **Enhanced Export**: Include volunteer status and attendance data.
 - Real-time booking management with conflict prevention
-- Journey-wise data export to CSV/Excel
 - Admin dashboard with journey statistics
 
 ## Tech Stack
@@ -69,7 +70,7 @@ npm start
 - Current Capacity: 15-20 concurrent users (SQLite)
 - Production Capacity: 1000+ users (PostgreSQL)
 - Session Timeout: 8 hours
-- Seat Layout: 42 seats with priority allocation
+- Seat Layout: Dynamic (Default 40)
 - Journey Types: Onward, Return, or Both
 
 ## Project Structure
@@ -80,7 +81,7 @@ BusSewa/
 │   ├── passengers/         # Passenger models with age criteria
 │   ├── bookings/          # Journey-based booking system
 │   ├── bussewa_api/       # Main Django app
-│   └── export_db.py       # Database migration tool
+│   └── manage_data.py     # Database backup/restore tool
 ├── frontend/
 │   ├── src/
 │   │   ├── components/    # React components
@@ -88,7 +89,8 @@ BusSewa/
 │   │   └── config/        # App configuration
 │   └── public/
 ├── IMPORT_TEMPLATE.csv    # Data import template
-└── ARCHITECTURE.md        # Technical documentation
+├── ARCHITECTURE.md        # Technical documentation
+└── DATA_MANAGEMENT.md     # Backup & Restore guide
 ```
 
 ## Configuration
@@ -97,12 +99,13 @@ BusSewa/
 Update `frontend/src/config/app.config.ts` to change app name, organization, and branding.
 
 ### Database Migration
+See [DATA_MANAGEMENT.md](DATA_MANAGEMENT.md) for detailed instructions.
 ```bash
 # Export current database
-python export_db.py export > backup.json
+python manage_data.py export > backup.json
 
 # Import to new instance
-python export_db.py import < backup.json
+python manage_data.py import < backup.json
 ```
 
 ## Production Deployment
@@ -114,6 +117,13 @@ python export_db.py import < backup.json
 
 See ARCHITECTURE.md for detailed deployment guide.
 
+## Version 3.0 Features (New)
+
+- **Volunteer Designation**: Mark passengers as volunteers with visual indicators.
+- **Dynamic Bus Capacity**: Set different seat counts per bus (e.g., 30, 40, 50).
+- **Attendance Dashboard**: interactive tool to mark attendance and manage bus shifts.
+- **Enhanced Data Management**: New `manage_data.py` script and `DATA_MANAGEMENT.md` guide.
+
 ## Version 2.0 Features
 
 - Journey Manager for date and pricing configuration
@@ -124,4 +134,4 @@ See ARCHITECTURE.md for detailed deployment guide.
 
 ---
 
-**Built for MSS 2026** | **Version 2.0** | **Production Ready**
+**Built for MSS 2026** | **Version 3.0** | **Production Ready**

@@ -13,8 +13,8 @@ export const APP_CONFIG = {
   // Version
   VERSION: "v2.0",
   
-  // API Configuration
-  API_BASE_URL: process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000',
+  // API Configuration - Fixed for production
+  API_BASE_URL: process.env.REACT_APP_API_URL || '/api',
   
   // Features
   FEATURES: {

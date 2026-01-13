@@ -28,9 +28,13 @@ interface JourneyPricing {
   is_active: boolean;
 }
 
-const BookingForm: React.FC = () => {
+interface BookingFormProps {
+  initialPassengerId?: number | null;
+}
+
+const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
   const [formData, setFormData] = useState({
-    passenger: '',
+    passenger: initialPassengerId ? initialPassengerId.toString() : '',
     journey_type: 'BOTH' as 'ONWARD' | 'RETURN' | 'BOTH',
     onward_journey: '',
     return_journey: '',
@@ -54,7 +58,7 @@ const BookingForm: React.FC = () => {
 
   const fetchJourneys = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/journeys/', { credentials: 'include' });
+      const response = await fetch('/api/journeys/', { credentials: 'include' });
       const data = await response.json();
       setJourneys(Array.isArray(data) ? data.filter((j: Journey) => j.is_active) : []);
     } catch (error) {
@@ -64,7 +68,7 @@ const BookingForm: React.FC = () => {
 
   const fetchPricing = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/journey-pricing/', { credentials: 'include' });
+      const response = await fetch('/api/journey-pricing/', { credentials: 'include' });
       const data = await response.json();
       setPricing(Array.isArray(data) ? data.filter((p: JourneyPricing) => p.is_active) : []);
     } catch (error) {
@@ -94,8 +98,8 @@ const BookingForm: React.FC = () => {
     const passenger = passengers.find(p => p.id.toString() === passengerId);
     if (!passenger) return 0;
 
-    const journeyPricing = pricing.find(p => 
-      p.journey_type === journeyType && 
+    const journeyPricing = pricing.find(p =>
+      p.journey_type === journeyType &&
       p.age_criteria === passenger.age_criteria
     );
 
@@ -108,13 +112,13 @@ const BookingForm: React.FC = () => {
       return;
     }
 
-    const onwardPrice = (formData.journey_type === 'ONWARD' || formData.journey_type === 'BOTH') 
+    const onwardPrice = (formData.journey_type === 'ONWARD' || formData.journey_type === 'BOTH')
       ? calculateJourneyPrice('ONWARD', formData.passenger) : 0;
-    const returnPrice = (formData.journey_type === 'RETURN' || formData.journey_type === 'BOTH') 
+    const returnPrice = (formData.journey_type === 'RETURN' || formData.journey_type === 'BOTH')
       ? calculateJourneyPrice('RETURN', formData.passenger) : 0;
-    
+
     const totalPrice = Number(onwardPrice) + Number(returnPrice);
-    
+
     setCalculatedPrice({
       onward: Number(onwardPrice),
       return: Number(returnPrice),
@@ -137,7 +141,7 @@ const BookingForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await bookingAPI.create(formData);
       alert(`Booking created successfully! Total Price: ₹${calculatedPrice.total}`);
@@ -162,7 +166,7 @@ const BookingForm: React.FC = () => {
   return (
     <div style={{ maxWidth: '600px', margin: '20px auto', padding: '20px' }}>
       <h2>Create New Booking</h2>
-      
+
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
           <label>Select Passenger:</label>
@@ -183,11 +187,11 @@ const BookingForm: React.FC = () => {
         </div>
 
         {selectedPassenger && (
-          <div style={{ 
-            marginBottom: '15px', 
-            padding: '15px', 
-            backgroundColor: '#e7f3ff', 
-            borderRadius: '4px' 
+          <div style={{
+            marginBottom: '15px',
+            padding: '15px',
+            backgroundColor: '#e7f3ff',
+            borderRadius: '4px'
           }}>
             <h4 style={{ margin: '0 0 10px 0' }}>Pricing Breakdown</h4>
             {(formData.journey_type === 'ONWARD' || formData.journey_type === 'BOTH') && (

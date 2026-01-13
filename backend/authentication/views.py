@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -27,6 +28,9 @@ class LoginView(View):
             if user and user.is_active:
                 login(request, user)
                 
+                # Force CSRF cookie to be set
+                csrf_token = get_token(request)
+                
                 # Get or create profile
                 profile, created = UserProfile.objects.get_or_create(
                     user=user,
@@ -38,7 +42,7 @@ class LoginView(View):
                     user.role = 'admin'
                     user.save()
                 
-                return JsonResponse({
+                response = JsonResponse({
                     'success': True,
                     'user': {
                         'id': user.id,
@@ -48,6 +52,9 @@ class LoginView(View):
                         'is_staff': user.is_staff
                     }
                 })
+                # Initializing csrf token
+                response['X-CSRFToken'] = csrf_token
+                return response
             else:
                 return JsonResponse({'error': 'Invalid credentials'}, status=401)
                 

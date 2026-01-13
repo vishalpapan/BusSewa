@@ -22,9 +22,31 @@ class BusSerializer(serializers.ModelSerializer):
     journey_details = JourneySerializer(source='journey', read_only=True)
     assigned_volunteer_details = UserSerializer(source='assigned_volunteer', read_only=True)
     
+    volunteer_passengers = serializers.SerializerMethodField()
+    
     class Meta:
         model = Bus
         fields = '__all__'
+
+    def get_volunteer_passengers(self, obj):
+        volunteers = []
+        # Check onward bookings
+        for booking in obj.onward_bookings.filter(is_volunteer=True):
+            volunteers.append({
+                'booking_id': booking.id,
+                'passenger_name': booking.passenger.name,
+                'seat': booking.onward_seat_number,
+                'type': 'ONWARD'
+            })
+        # Check return bookings
+        for booking in obj.return_bookings.filter(is_volunteer=True):
+            volunteers.append({
+                'booking_id': booking.id,
+                'passenger_name': booking.passenger.name,
+                'seat': booking.return_seat_number,
+                'type': 'RETURN'
+            })
+        return volunteers
 
 class PickupPointSerializer(serializers.ModelSerializer):
     class Meta:

@@ -24,7 +24,7 @@ const VolunteerManagement: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/auth/users/', {
+      const response = await fetch('/api/auth/users/', {
         credentials: 'include'
       });
       const data = await response.json();
@@ -39,7 +39,7 @@ const VolunteerManagement: React.FC = () => {
 
   const updateUserPermissions = async (userId: number, permissions: any) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/users/${userId}/update_permissions/`, {
+      const response = await fetch(`/api/auth/users/${userId}/update_permissions/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -60,7 +60,7 @@ const VolunteerManagement: React.FC = () => {
 
   const toggleUserStatus = async (userId: number, isActive: boolean) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/users/${userId}/toggle_status/`, {
+      const response = await fetch(`/api/auth/users/${userId}/toggle_status/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -300,7 +300,7 @@ const VolunteerManagement: React.FC = () => {
       }}>
         <h4>📝 How to Add New Volunteers:</h4>
         <ol style={{ margin: 0, paddingLeft: '20px' }}>
-          <li>Go to Django Admin: <code>http://127.0.0.1:8000/admin/</code></li>
+          <li>Go to Django Admin: <code>/api/admin/</code></li>
           <li>Navigate to <strong>Authentication → Users</strong></li>
           <li>Click <strong>"Add User"</strong></li>
           <li>Set username, password, and role (volunteer/admin)</li>

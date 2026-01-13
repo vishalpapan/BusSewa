@@ -7,30 +7,31 @@ const ExportData: React.FC = () => {
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
-  
+
   const availableColumns = [
     'S.No.', 'Name', 'Gender', 'Age', 'Age Criteria', 'Category', 'Mobile No', 'Aadhar Number',
     'Journey Type', 'Onward Date', 'Return Date', 'Onward Seat', 'Return Seat', 'Onward Bus', 'Return Bus',
-    'Onward Price', 'Return Price', 'Total Price', 'Volunteer', 'Payment Status', 'Payment Method',
-    'Collected By', 'Payment Date', 'Booking Status', 'Created Date'
+    'Onward Price', 'Return Price', 'Total Price', 'Assigned Volunteer', 'Is Passenger Volunteer',
+    'Attendance (Onward)', 'Attendance (Return)', 'Attendance Notes',
+    'Payment Status', 'Payment Method', 'Collected By', 'Payment Date', 'Booking Status', 'Created Date'
   ];
-  
+
   useEffect(() => {
     fetchBusesAndVolunteers();
     setSelectedColumns(availableColumns); // Select all by default
   }, []);
-  
+
   const fetchBusesAndVolunteers = async () => {
     try {
       const [busesRes, volunteersRes] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/buses/', { credentials: 'include' }),
-        fetch('http://127.0.0.1:8000/auth/users/', { credentials: 'include' })
+        fetch('/api/buses/', { credentials: 'include' }),
+        fetch('/api/auth/users/', { credentials: 'include' })
       ]);
-      
+
       if (!busesRes.ok || !volunteersRes.ok) {
         throw new Error('Failed to fetch data');
       }
-      
+
       const busesData = await busesRes.json();
       const volunteersData = await volunteersRes.json();
       setBuses(Array.isArray(busesData) ? busesData : []);
@@ -44,16 +45,16 @@ const ExportData: React.FC = () => {
 
   const formatCellValue = (value: any): string => {
     if (value === null || value === undefined) return '';
-    
+
     const stringValue = String(value);
-    
+
     // Handle values with commas, quotes, or newlines by wrapping in quotes
     if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
       // Escape quotes by doubling them
       const escapedValue = stringValue.replace(/"/g, '""');
       return `"${escapedValue}"`;
     }
-    
+
     return stringValue;
   };
 
@@ -65,11 +66,11 @@ const ExportData: React.FC = () => {
 
     // Get headers from first object
     const headers = Object.keys(data[0]);
-    
+
     // Create CSV content with proper formatting
     const csvContent = [
       headers.map(header => formatCellValue(header)).join(','), // Header row
-      ...data.map(row => 
+      ...data.map(row =>
         headers.map(header => formatCellValue(row[header])).join(',')
       )
     ].join('\r\n'); // Use Windows line endings for better Excel compatibility
@@ -108,7 +109,7 @@ const ExportData: React.FC = () => {
         'Verification Status': p.verification_status || 'Not Required',
         'Created Date': new Date(p.created_at).toLocaleDateString('en-IN')
       }));
-      
+
       exportToCSV(passengers, 'passengers_list');
       alert('Passengers data exported successfully!');
     } catch (error) {
@@ -126,13 +127,13 @@ const ExportData: React.FC = () => {
         bookingAPI.getAll(),
         paymentAPI.getAll()
       ]);
-      
+
       const bookings = bookingsRes.data.map((b: any) => {
         const payment = paymentsRes.data.find((p: any) => p.booking === b.id);
         const amountReceived = payment ? parseFloat(payment.amount) : 0;
         const totalPrice = parseFloat(b.total_price || 0);
         const balance = amountReceived - totalPrice;
-        
+
         return {
           'Booking ID': b.id,
           'Passenger Name': b.passenger_details?.name || '',
@@ -146,19 +147,22 @@ const ExportData: React.FC = () => {
           'Pickup Point': b.pickup_point_name || '',
           'Onward Seat': b.onward_seat_number || '',
           'Return Seat': b.return_seat_number || '',
-          'Onward Bus': b.onward_bus_details?.bus_number || '',
           'Return Bus': b.return_bus_details?.bus_number || '',
           'Onward Price': parseFloat(b.onward_price || 0).toFixed(2),
           'Return Price': parseFloat(b.return_price || 0).toFixed(2),
           'Total Price': totalPrice.toFixed(2),
           'Amount Received': amountReceived.toFixed(2),
           'Balance': balance.toFixed(2),
+          'Is Passenger Volunteer': b.is_volunteer ? 'Yes' : 'No',
+          'Attendance (Onward)': b.onward_attendance === true ? 'Present' : b.onward_attendance === false ? 'Absent' : '',
+          'Attendance (Return)': b.return_attendance === true ? 'Present' : b.return_attendance === false ? 'Absent' : '',
+          'Attendance Notes': b.attendance_notes || '',
           'Status': b.status || '',
           'Remarks': b.remarks || '',
           'Created Date': new Date(b.created_at).toLocaleDateString('en-IN')
         };
       });
-      
+
       exportToCSV(bookings, 'bookings_list');
       alert('Bookings data exported successfully!');
     } catch (error) {
@@ -183,7 +187,7 @@ const ExportData: React.FC = () => {
         'Payment Date': new Date(p.payment_date).toLocaleDateString('en-IN'),
         'Created Date': new Date(p.created_at).toLocaleDateString('en-IN')
       }));
-      
+
       exportToCSV(payments, 'payments_list');
       alert('Payments data exported successfully!');
     } catch (error) {
@@ -197,14 +201,14 @@ const ExportData: React.FC = () => {
   const exportByVolunteer = async (volunteerId: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/bookings/by_volunteer/?volunteer_id=${volunteerId}`, { credentials: 'include' });
-      
+      const response = await fetch(`/api/bookings/by_volunteer/?volunteer_id=${volunteerId}`, { credentials: 'include' });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const bookings = await response.json();
-      
+
       const volunteerData = bookings.map((b: any, index: number) => {
         const finalAmount = b.custom_amount || b.calculated_price;
         return {
@@ -218,7 +222,7 @@ const ExportData: React.FC = () => {
           'Volunteer': b.assigned_volunteer_details?.username || ''
         };
       });
-      
+
       const volunteer = volunteers.find(v => v.id === volunteerId);
       exportToCSV(volunteerData, `volunteer_${volunteer?.username || volunteerId}_passengers`);
       alert('Volunteer passenger list exported successfully!');
@@ -229,18 +233,18 @@ const ExportData: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const exportByBus = async (busId: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/buses/${busId}/passenger_list/`, { credentials: 'include' });
-      
+      const response = await fetch(`/api/buses/${busId}/passenger_list/`, { credentials: 'include' });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       const busData = data.passengers.map((b: any, index: number) => {
         const finalAmount = b.custom_amount || b.calculated_price;
         return {
@@ -253,7 +257,7 @@ const ExportData: React.FC = () => {
           'Volunteer': b.assigned_volunteer_details?.username || ''
         };
       });
-      
+
       exportToCSV(busData, `bus_${data.bus.bus_number || busId}_passengers`);
       alert('Bus passenger list exported successfully!');
     } catch (error) {
@@ -263,16 +267,16 @@ const ExportData: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const exportCustomColumns = async () => {
     if (selectedColumns.length === 0) {
       alert('Please select at least one column to export');
       return;
     }
-    
+
     setLoading(true);
     console.log('🔍 Starting custom export with columns:', selectedColumns);
-    
+
     try {
       console.log('📡 Fetching data from APIs...');
       const [passengersRes, bookingsRes, paymentsRes] = await Promise.all([
@@ -280,7 +284,7 @@ const ExportData: React.FC = () => {
         bookingAPI.getAll(),
         paymentAPI.getAll()
       ]);
-      
+
       console.log('✅ API responses received:', {
         passengers: passengersRes?.data?.length || 0,
         bookings: bookingsRes?.data?.length || 0,
@@ -292,7 +296,7 @@ const ExportData: React.FC = () => {
         const payment = paymentsRes.data.find((p: any) => p.booking === booking?.id);
         const totalPrice = booking ? parseFloat(booking.total_price || 0) : 0;
         const amountReceived = payment ? parseFloat(payment.amount) : 0;
-        
+
         const fullData = {
           'S.No.': index + 1,
           'Name': passenger.name || '',
@@ -312,7 +316,11 @@ const ExportData: React.FC = () => {
           'Onward Price': booking ? parseFloat(booking.onward_price || 0).toFixed(2) : '',
           'Return Price': booking ? parseFloat(booking.return_price || 0).toFixed(2) : '',
           'Total Price': totalPrice > 0 ? totalPrice.toFixed(2) : '',
-          'Volunteer': booking?.assigned_volunteer_details?.username || '',
+          'Assigned Volunteer': booking?.assigned_volunteer_details?.username || '',
+          'Is Passenger Volunteer': booking?.is_volunteer ? 'Yes' : 'No',
+          'Attendance (Onward)': booking?.onward_attendance === true ? 'Present' : booking?.onward_attendance === false ? 'Absent' : '',
+          'Attendance (Return)': booking?.return_attendance === true ? 'Present' : booking?.return_attendance === false ? 'Absent' : '',
+          'Attendance Notes': booking?.attendance_notes || '',
           'Payment Status': booking?.payment_status || 'Pending',
           'Payment Method': payment?.payment_method || '',
           'Collected By': payment?.collected_by || '',
@@ -320,7 +328,7 @@ const ExportData: React.FC = () => {
           'Booking Status': booking?.status || '',
           'Created Date': new Date(passenger.created_at).toLocaleDateString('en-IN')
         };
-        
+
         // Filter to only selected columns
         const filteredData: any = {};
         selectedColumns.forEach(col => {
@@ -328,17 +336,17 @@ const ExportData: React.FC = () => {
             filteredData[col] = fullData[col as keyof typeof fullData];
           }
         });
-        
+
         return filteredData;
       });
 
       console.log('📊 Generated data rows:', allData.length);
-      
+
       if (allData.length === 0) {
         alert('No data available to export');
         return;
       }
-      
+
       exportToCSV(allData, 'custom_export');
       alert('Custom export completed successfully!');
     } catch (error) {
@@ -353,22 +361,22 @@ const ExportData: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const toggleColumn = (column: string) => {
-    setSelectedColumns(prev => 
-      prev.includes(column) 
+    setSelectedColumns(prev =>
+      prev.includes(column)
         ? prev.filter(c => c !== column)
         : [...prev, column]
     );
   };
-  
+
   const selectAllColumns = () => setSelectedColumns(availableColumns);
   const clearAllColumns = () => setSelectedColumns([]);
 
   return (
     <div style={{ maxWidth: '800px', margin: '20px auto', padding: '20px' }}>
       <h2>📊 Export Data to Excel/CSV</h2>
-      
+
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -576,7 +584,7 @@ const ExportData: React.FC = () => {
           </button>
         </div>
       )}
-      
+
 
 
       {loading && (

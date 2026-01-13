@@ -13,5 +13,5 @@ router.register(r'pickup-points', PickupPointViewSet)
 router.register(r'seat-cancellations', SeatCancellationViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]

@@ -119,7 +119,7 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
   return (
     <div style={{ maxWidth: '1200px', margin: '20px auto', padding: '20px' }}>
       <h2>Passenger List ({passengers.length})</h2>
-      
+
       {/* Search */}
       <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
         <input
@@ -129,13 +129,13 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ padding: '8px', flex: 1 }}
         />
-        <button 
+        <button
           onClick={handleSearch}
           style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none' }}
         >
           Search
         </button>
-        <button 
+        <button
           onClick={fetchPassengers}
           style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none' }}
         >
@@ -163,7 +163,7 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
             {passengers.map((passenger) => {
               const booking = getPassengerBookingStatus(passenger.id);
               const price = calculatePrice(passenger.age_criteria);
-              
+
               return (
                 <tr key={passenger.id}>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>{passenger.name}</td>
@@ -176,8 +176,8 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                     {booking ? (
-                      <span style={{ 
-                        padding: '4px 8px', 
+                      <span style={{
+                        padding: '4px 8px',
                         borderRadius: '4px',
                         backgroundColor: '#d4edda',
                         color: '#155724',
@@ -186,8 +186,8 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
                         Booked (₹{booking.calculated_price})
                       </span>
                     ) : (
-                      <span style={{ 
-                        padding: '4px 8px', 
+                      <span style={{
+                        padding: '4px 8px',
                         borderRadius: '4px',
                         backgroundColor: '#f8d7da',
                         color: '#721c24',
@@ -198,12 +198,12 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
                     )}
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                    {!booking ? (
+                    <div style={{ display: 'flex', gap: '5px' }}>
                       <button
-                        onClick={() => openBookingModal(passenger)}
+                        onClick={() => onNavigate && onNavigate('add', passenger.id)}
                         style={{
-                          backgroundColor: '#007bff',
-                          color: 'white',
+                          backgroundColor: '#ffc107',
+                          color: '#212529',
                           border: 'none',
                           padding: '6px 12px',
                           borderRadius: '4px',
@@ -211,11 +211,27 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
                           fontSize: '12px'
                         }}
                       >
-                        Create Booking (₹{price})
+                        Edit
                       </button>
-                    ) : (
-                      <span style={{ fontSize: '12px', color: '#666' }}>Already Booked</span>
-                    )}
+                      {!booking ? (
+                        <button
+                          onClick={() => openBookingModal(passenger)}
+                          style={{
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          Booking (₹{price})
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '12px', color: '#666', alignSelf: 'center' }}>Booked</span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                     {new Date(passenger.created_at).toLocaleDateString()}

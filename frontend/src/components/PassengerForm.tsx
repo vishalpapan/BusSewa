@@ -3,9 +3,10 @@ import { passengerAPI } from '../services/api';
 
 interface PassengerFormProps {
   onSuccess?: () => void;
+  passengerId?: number | null;
 }
 
-const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
+const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess, passengerId }) => {
   const [formData, setFormData] = useState({
     name: '',
     gender: '',
@@ -24,9 +25,58 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
 
   const [loading, setLoading] = useState(false);
 
+  // Fetch passenger data if in edit mode
+  useEffect(() => {
+    if (passengerId) {
+      fetchPassengerDetails(passengerId);
+    } else {
+      // Reset form if no passengerId (Add mode)
+      setFormData({
+        name: '',
+        gender: '',
+        age: '',
+        age_criteria: '',
+        category: '',
+        mobile_no: '',
+        aadhar_number: '',
+        aadhar_received: false,
+        related_to: '',
+        relationship: '',
+      });
+      setAadharFile(null);
+      setShowFamilyOptions(false);
+    }
+  }, [passengerId]);
+
+  const fetchPassengerDetails = async (id: number) => {
+    setLoading(true);
+    try {
+      const response = await passengerAPI.getById(id);
+      const data = response.data;
+      setFormData({
+        name: data.name,
+        gender: data.gender,
+        age: data.age?.toString() || '',
+        age_criteria: data.age_criteria,
+        category: data.category,
+        mobile_no: data.mobile_no || '',
+        aadhar_number: data.aadhar_number || '',
+        aadhar_received: data.aadhar_received || false,
+        related_to: data.related_to || '',
+        relationship: data.relationship || '',
+      });
+      if (data.related_to) setShowFamilyOptions(true);
+    } catch (error) {
+      console.error('Error fetching passenger details:', error);
+      alert('Error loading passenger data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const calculateAgeCriteria = (age: number, gender: string) => {
     if (!age || !gender) return '';
-    
+
     if (gender === 'M') {
       if (age <= 12) return 'M-12 & Below';
       if (age >= 75) return 'M&F-75 & Above';
@@ -40,7 +90,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
   };
 
   const isAadharRequired = (ageCriteria: string) => {
-    const requiredCategories = ['M-12 & Below', 'F-12 & Below', 'M-65 & Above', 'M&F-75 & Above'];
+    const requiredCategories = ['M-65 & Above', 'M&F-75 & Above'];
     return requiredCategories.includes(ageCriteria);
   };
 
@@ -60,17 +110,17 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
+
     const newValue = type === 'checkbox' ? checked : value;
     const updatedData = { ...formData, [name]: newValue };
-    
+
     // Auto-calculate age criteria when age or gender changes
     if (name === 'age' || name === 'gender') {
       const age = name === 'age' ? parseInt(value) : parseInt(formData.age);
       const gender = name === 'gender' ? value : formData.gender;
       updatedData.age_criteria = calculateAgeCriteria(age, gender);
     }
-    
+
     setFormData(updatedData);
   };
 
@@ -82,22 +132,28 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const submitData = new FormData();
-      
+
       // Add form fields
       Object.entries(formData).forEach(([key, value]) => {
         submitData.append(key, value.toString());
       });
-      
+
       // Add file if selected
       if (aadharFile) {
         submitData.append('aadhar_document', aadharFile);
       }
-      
-      await passengerAPI.create(submitData);
-      alert('Passenger added successfully!');
+
+      if (passengerId) {
+        await passengerAPI.update(passengerId, submitData);
+        alert('Passenger updated successfully!');
+      } else {
+        await passengerAPI.create(submitData);
+        alert('Passenger added successfully!');
+      }
+
       setFormData({
         name: '',
         gender: '',
@@ -115,7 +171,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
       setAadharFile(null);
       if (onSuccess) onSuccess();
     } catch (error: any) {
-      alert('Error adding passenger: ' + (error.message || 'Unknown error'));
+      alert(`Error ${passengerId ? 'updating' : 'adding'} passenger: ` + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -123,7 +179,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
 
   return (
     <div style={{ maxWidth: '600px', margin: '20px auto', padding: '20px' }}>
-      <h2>Add New Passenger</h2>
+      <h2>{passengerId ? 'Edit Passenger' : 'Add New Passenger'}</h2>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
           <label>Name:</label>
@@ -172,9 +228,9 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
             type="text"
             value={formData.age_criteria}
             readOnly
-            style={{ 
-              width: '100%', 
-              padding: '8px', 
+            style={{
+              width: '100%',
+              padding: '8px',
               marginTop: '5px',
               backgroundColor: '#f8f9fa',
               border: '1px solid #ddd'
@@ -222,15 +278,15 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
             placeholder="Enter 12-digit Aadhar number"
             maxLength={12}
             required={isAadharRequired(formData.age_criteria)}
-            style={{ 
-              width: '100%', 
-              padding: '8px', 
+            style={{
+              width: '100%',
+              padding: '8px',
               marginTop: '5px',
               borderColor: isAadharRequired(formData.age_criteria) ? '#dc3545' : '#ddd'
             }}
           />
           <small style={{ color: isAadharRequired(formData.age_criteria) ? '#dc3545' : '#666', fontSize: '12px' }}>
-            {isAadharRequired(formData.age_criteria) 
+            {isAadharRequired(formData.age_criteria)
               ? '⚠️ Aadhar number is mandatory for this age category'
               : 'Optional: 12-digit Aadhar number (numbers only)'
             }
@@ -335,7 +391,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ onSuccess }) => {
             cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
-          {loading ? 'Adding...' : 'Add Passenger'}
+          {loading ? 'Saving...' : (passengerId ? 'Update Passenger' : 'Add Passenger')}
         </button>
       </form>
     </div>

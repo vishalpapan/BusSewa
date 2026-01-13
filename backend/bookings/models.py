@@ -57,7 +57,7 @@ class JourneyPricing(models.Model):
 
 class Bus(models.Model):
     bus_number = models.CharField(max_length=20, blank=True)
-    capacity = models.IntegerField(default=42)
+    capacity = models.IntegerField(default=40)
     route_name = models.CharField(max_length=100, blank=True)
     journey = models.ForeignKey(Journey, on_delete=models.CASCADE, related_name='buses', null=True, blank=True)
     assigned_volunteer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_buses')
@@ -111,7 +111,13 @@ class Booking(models.Model):
     
     # Volunteer Assignment
     assigned_volunteer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_bookings')
-    
+    is_volunteer = models.BooleanField(default=False, help_text="Is this passenger a volunteer?")
+
+    # Attendance
+    onward_attendance = models.BooleanField(null=True, blank=True, default=None, help_text="True=Present, False=Absent, None=Not Marked")
+    return_attendance = models.BooleanField(null=True, blank=True, default=None, help_text="True=Present, False=Absent, None=Not Marked")
+    attendance_notes = models.TextField(blank=True, help_text="Notes for attendance/shifting")
+
     # Remarks
     remarks = models.TextField(blank=True)
     

@@ -1,6 +1,5 @@
 """
 Production settings for BusSewa
-Copy this to settings.py or import in production
 """
 
 from .settings import *
@@ -9,46 +8,51 @@ import os
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-# Update this with your domain/IP
-ALLOWED_HOSTS = ['your-domain.com', 'your-ec2-ip', 'localhost']
-
-# Security Settings
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# Update this with your domain/IP - ADD YOUR ACTUAL EC2 PUBLIC IP HERE
+ALLOWED_HOSTS = ['44.193.198.101', 'ec2-44-193-198-101.compute-1.amazonaws.com', 'localhost', '127.0.0.1']
 
 # CORS Settings for Production
+CORS_ALLOW_ALL_ORIGINS = True  # Temporarily allow all for testing
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://your-domain.com",
-    "http://your-ec2-ip",
+    "http://localhost:3000",  # For local testing
+    "http://127.0.0.1:3000",
+    "http://44.193.198.101",  # Your EC2 public IP
+    "https://44.193.198.101",
+    "http://ec2-44-193-198-101.compute-1.amazonaws.com",
+    "https://ec2-44-193-198-101.compute-1.amazonaws.com",
 ]
+
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://44.193.198.101",
+    "https://44.193.198.101",
+    "http://ec2-44-193-198-101.compute-1.amazonaws.com",
+    "https://ec2-44-193-198-101.compute-1.amazonaws.com",
+]
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
+STATIC_URL = '/django_static/'
 
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# Database
-# For production, consider PostgreSQL
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'bussewa_db',
-#         'USER': 'bussewa_user',
-#         'PASSWORD': 'your-password',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+# Database - keeping SQLite for simplicity
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Logging
 LOGGING = {

@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
         passengerAPI.getAll(),
         bookingAPI.getAll(),
         paymentAPI.getAll(),
-        fetch('http://127.0.0.1:8000/api/journeys/', { credentials: 'include' }),
+        fetch('/api/journeys/', { credentials: 'include' }),
       ]);
 
       const passengers = passengersRes.data;
