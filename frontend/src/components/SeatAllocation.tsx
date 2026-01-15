@@ -126,12 +126,32 @@ const SeatAllocation: React.FC = () => {
     return getPaidBookings().filter(b => {
       const seatNumber = selectedJourney === 'ONWARD' ? b.onward_seat_number : b.return_seat_number;
 
-      // For backward compatibility, show all bookings if no journey-specific data exists
+      // Check Journey Type match
       const hasJourney = selectedJourney === 'ONWARD'
         ? (b.journey_type === 'ONWARD' || b.journey_type === 'BOTH' || !b.journey_type)
         : (b.journey_type === 'RETURN' || b.journey_type === 'BOTH' || !b.journey_type);
 
-      return hasJourney && (!seatNumber || seatNumber === '' || seatNumber === '0');
+      if (!hasJourney) return false;
+
+      // Check Date Match (New Logic)
+      if (selectedBus) {
+        const currentBus = buses.find(bus => bus.id === selectedBus);
+        if (currentBus?.journey_details?.journey_date) {
+          const busDate = new Date(currentBus.journey_details.journey_date).toDateString();
+
+          const bookingDateStr = selectedJourney === 'ONWARD'
+            ? b.onward_journey_details?.journey_date
+            : b.return_journey_details?.journey_date;
+
+          // If booking has a specific date, it MUST match the bus date
+          if (bookingDateStr) {
+            const bookingDate = new Date(bookingDateStr).toDateString();
+            if (bookingDate !== busDate) return false;
+          }
+        }
+      }
+
+      return !seatNumber || seatNumber === '' || seatNumber === '0';
     });
   };
 
