@@ -237,29 +237,54 @@ const ExportData: React.FC = () => {
   const exportByBus = async (busId: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/buses/${busId}/passenger_list/`, { credentials: 'include' });
+      // Fetch both regular passengers and on-spot passengers
+      const [passengersRes, onSpotRes] = await Promise.all([
+        fetch(`/api/buses/${busId}/passenger_list/`, { credentials: 'include' }),
+        fetch(`/api/onspot-passengers/by_bus/?bus_id=${busId}`, { credentials: 'include' })
+      ]);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!passengersRes.ok) {
+        throw new Error(`HTTP error! status: ${passengersRes.status}`);
       }
 
-      const data = await response.json();
+      const data = await passengersRes.json();
+      const onSpotData = onSpotRes.ok ? await onSpotRes.json() : [];
 
+      // Map regular passengers
       const busData = data.passengers.map((b: any, index: number) => {
-        const finalAmount = b.custom_amount || b.calculated_price;
+        const finalAmount = b.custom_amount || b.calculated_price || b.total_price || 0;
         return {
           'S.No.': index + 1,
+          'Type': 'Reserved',
           'Name': b.passenger_details?.name || '',
+          'Age': b.passenger_details?.age || '',
           'Mobile': b.passenger_details?.mobile_no || '',
-          'Seat Number': b.seat_number || '',
-          'Amount': finalAmount.toFixed(2),
+          'Seat Number': b.onward_seat_number || b.return_seat_number || b.seat_number || '',
+          'Amount': parseFloat(finalAmount).toFixed(2),
           'Payment Status': b.payment_status || 'Pending',
-          'Volunteer': b.assigned_volunteer_details?.username || ''
+          'Volunteer': b.is_volunteer ? 'Yes' : 'No',
+          'Attendance': b.onward_attendance === true ? 'Present' : b.onward_attendance === false ? 'Absent' : ''
         };
       });
 
-      exportToCSV(busData, `bus_${data.bus.bus_number || busId}_passengers`);
-      alert('Bus passenger list exported successfully!');
+      // Add on-spot passengers
+      const onSpotExport = onSpotData.map((p: any, index: number) => ({
+        'S.No.': busData.length + index + 1,
+        'Type': 'On-Spot',
+        'Name': p.name || '',
+        'Age': p.age || '',
+        'Mobile': p.mobile_no || '',
+        'Seat Number': 'Standing',
+        'Amount': parseFloat(p.calculated_price || 0).toFixed(2),
+        'Payment Status': p.payment_status || 'Pending',
+        'Volunteer': 'No',
+        'Attendance': 'Present'
+      }));
+
+      const combinedData = [...busData, ...onSpotExport];
+
+      exportToCSV(combinedData, `bus_${data.bus.bus_number || busId}_passengers`);
+      alert(`Bus passenger list exported successfully! (${busData.length} reserved + ${onSpotExport.length} on-spot)`);
     } catch (error) {
       console.error('Export bus error:', error);
       alert(`Error exporting bus data: ${error instanceof Error ? error.message : 'Unknown error'}`);

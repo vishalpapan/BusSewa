@@ -56,6 +56,11 @@ const BookingList: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    bus_id: '',
+    journey_type: ''
+  });
+  const [buses, setBuses] = useState<any[]>([]);
   const [paymentModal, setPaymentModal] = useState<{ show: boolean; booking: Booking | null }>({
     show: false,
     booking: null
@@ -77,12 +82,39 @@ const BookingList: React.FC = () => {
     notes: ''
   });
 
+
+
+
+
   useEffect(() => {
     fetchBookings();
-
+    fetchBuses();
+    checkUserRole();
   }, []);
 
+  const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkUserRole = async () => {
+    try {
+      const response = await fetch('/api/auth/current-user/', { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setIsAdmin(data.role === 'admin');
+      }
+    } catch (error) {
+      console.error('Error checking role:', error);
+    }
+  };
+
+  const fetchBuses = async () => {
+    try {
+      const response = await fetch('/api/buses/', { credentials: 'include' });
+      const data = await response.json();
+      setBuses(data);
+    } catch (error) {
+      console.error('Error fetching buses:', error);
+    }
+  };
 
   const fetchBookings = async () => {
     try {
@@ -109,7 +141,7 @@ const BookingList: React.FC = () => {
       payment_received_date: new Date().toISOString().split('T')[0],
     });
   };
-  
+
   const updateBookingAmount = async (bookingId: number, newAmount: string) => {
     try {
       await fetch(`/api/bookings/${bookingId}/update_amount/`, {
@@ -120,10 +152,34 @@ const BookingList: React.FC = () => {
       setEditingAmount(null);
       fetchBookings();
     } catch (error) {
+
       alert('Error updating amount');
     }
   };
-  
+
+  const handleDeleteBooking = async (bookingId: number) => {
+    if (!window.confirm('ARE YOU SURE? This will permanently delete the booking and cannot be undone. Use Cancel instead if you want to keep records.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}/`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        alert('Booking deleted successfully');
+        fetchBookings();
+      } else {
+        const data = await response.json();
+        alert('Error: ' + (data.error || 'Failed to delete'));
+      }
+    } catch (error) {
+      alert('Error deleting booking');
+    }
+  };
+
   const openCancelModal = (booking: Booking) => {
     setCancelModal({ show: true, booking });
     setCancelData({
@@ -132,11 +188,11 @@ const BookingList: React.FC = () => {
       notes: ''
     });
   };
-  
+
   const handleBookingCancellation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cancelModal.booking) return;
-    
+
     try {
       await fetch(`/api/bookings/${cancelModal.booking.id}/cancel_booking/`, {
         method: 'POST',
@@ -180,7 +236,37 @@ const BookingList: React.FC = () => {
   return (
     <div style={{ maxWidth: '1400px', margin: '20px auto', padding: '20px' }}>
       <h2>Booking List ({bookings.length})</h2>
-      
+
+      {/* Filters */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '15px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Filter by Bus:</label>
+          <select
+            value={filters.bus_id}
+            onChange={(e) => setFilters({ ...filters, bus_id: e.target.value })}
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ced4da' }}
+          >
+            <option value="">All Buses</option>
+            {buses.map(bus => (
+              <option key={bus.id} value={bus.id}>{bus.bus_number}</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Filter by Journey:</label>
+          <select
+            value={filters.journey_type}
+            onChange={(e) => setFilters({ ...filters, journey_type: e.target.value })}
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ced4da' }}
+          >
+            <option value="">All Journeys</option>
+            <option value="ONWARD">Onward</option>
+            <option value="RETURN">Return</option>
+            <option value="BOTH">Both</option>
+          </select>
+        </div>
+      </div>
+
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
           <thead>
@@ -196,121 +282,119 @@ const BookingList: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking) => {
+            {bookings.filter(booking => {
+              if (filters.bus_id) {
+                const busId = Number(filters.bus_id);
+                const onwardMatch = booking.onward_bus_details?.id === busId;
+                const returnMatch = booking.return_bus_details?.id === busId;
+                if (!onwardMatch && !returnMatch) return false;
+              }
+              if (filters.journey_type) {
+                if (filters.journey_type === 'ONWARD' && !booking.onward_seat_number) return false;
+                if (filters.journey_type === 'RETURN' && !booking.return_seat_number) return false;
+                if (filters.journey_type === 'BOTH' && (!booking.onward_seat_number || !booking.return_seat_number)) return false;
+              }
+              return true;
+            }).map((booking) => {
               const finalAmount = booking.custom_amount || booking.total_price || 0;
               return (
-              <tr key={booking.id}>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  <strong>{booking.passenger_details.name}</strong>
-                  <br />
-                  <small>{booking.passenger_details.age_criteria}</small>
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  {booking.passenger_details.mobile_no}
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  {booking.assigned_volunteer_details ? 
-                    booking.assigned_volunteer_details.profile.full_name : 
-                    <span style={{ color: '#999' }}>Not assigned</span>
-                  }
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  {booking.onward_seat_number || booking.return_seat_number ? (
-                    <div>
-                      {booking.onward_seat_number && (
-                        <div><strong>Onward:</strong> {booking.onward_seat_number} ({booking.onward_bus_details?.bus_number || 'TBD'})</div>
-                      )}
-                      {booking.return_seat_number && (
-                        <div><strong>Return:</strong> {booking.return_seat_number} ({booking.return_bus_details?.bus_number || 'TBD'})</div>
-                      )}
-                    </div>
-                  ) : (
-                    <span style={{ color: '#999' }}>No seats assigned</span>
-                  )}
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  {editingAmount?.bookingId === booking.id ? (
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      <input
-                        type="number"
-                        value={editingAmount.amount}
-                        onChange={(e) => setEditingAmount({ bookingId: booking.id, amount: e.target.value })}
-                        style={{ width: '80px', padding: '2px' }}
-                      />
+                <tr key={booking.id}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    <strong>{booking.passenger_details.name}</strong>
+                    <br />
+                    <small>{booking.passenger_details.age_criteria}</small>
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    {booking.passenger_details.mobile_no}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    {booking.assigned_volunteer_details ?
+                      booking.assigned_volunteer_details.profile.full_name :
+                      <span style={{ color: '#999' }}>Not assigned</span>
+                    }
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    {booking.onward_seat_number || booking.return_seat_number ? (
+                      <div>
+                        {booking.onward_seat_number && (
+                          <div><strong>Onward:</strong> {booking.onward_seat_number} ({booking.onward_bus_details?.bus_number || 'TBD'})</div>
+                        )}
+                        {booking.return_seat_number && (
+                          <div><strong>Return:</strong> {booking.return_seat_number} ({booking.return_bus_details?.bus_number || 'TBD'})</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span style={{ color: '#999' }}>No seats assigned</span>
+                    )}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    {editingAmount?.bookingId === booking.id ? (
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        <input
+                          type="number"
+                          value={editingAmount.amount}
+                          onChange={(e) => setEditingAmount({ bookingId: booking.id, amount: e.target.value })}
+                          style={{ width: '80px', padding: '2px' }}
+                        />
+                        <button
+                          onClick={() => updateBookingAmount(booking.id, editingAmount.amount)}
+                          style={{ padding: '2px 6px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '2px' }}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() => setEditingAmount(null)}
+                          style={{ padding: '2px 6px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '2px' }}
+                        >
+                          ✗
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <strong
+                          onClick={() => setEditingAmount({ bookingId: booking.id, amount: finalAmount.toString() })}
+                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                          title="Click to edit"
+                        >
+                          ₹{finalAmount}
+                        </strong>
+                        {booking.custom_amount && (
+                          <div style={{ fontSize: '10px', color: '#666' }}>Custom amount</div>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      backgroundColor:
+                        booking.payment_status === 'Paid' ? '#d4edda' :
+                          booking.payment_status === 'Partial' ? '#fff3cd' : '#f8d7da',
+                      color:
+                        booking.payment_status === 'Paid' ? '#155724' :
+                          booking.payment_status === 'Partial' ? '#856404' : '#721c24'
+                    }}>
+                      {booking.payment_status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      backgroundColor: booking.status === 'Active' ? '#d4edda' : '#f8d7da',
+                      color: booking.status === 'Active' ? '#155724' : '#721c24'
+                    }}>
+                      {booking.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                       <button
-                        onClick={() => updateBookingAmount(booking.id, editingAmount.amount)}
-                        style={{ padding: '2px 6px', fontSize: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '2px' }}
-                      >
-                        ✓
-                      </button>
-                      <button
-                        onClick={() => setEditingAmount(null)}
-                        style={{ padding: '2px 6px', fontSize: '10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '2px' }}
-                      >
-                        ✗
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <strong 
-                        onClick={() => setEditingAmount({ bookingId: booking.id, amount: finalAmount.toString() })}
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                        title="Click to edit"
-                      >
-                        ₹{finalAmount}
-                      </strong>
-                      {booking.custom_amount && (
-                        <div style={{ fontSize: '10px', color: '#666' }}>Custom amount</div>
-                      )}
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  <span style={{ 
-                    padding: '4px 8px', 
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    backgroundColor: 
-                      booking.payment_status === 'Paid' ? '#d4edda' : 
-                      booking.payment_status === 'Partial' ? '#fff3cd' : '#f8d7da',
-                    color: 
-                      booking.payment_status === 'Paid' ? '#155724' : 
-                      booking.payment_status === 'Partial' ? '#856404' : '#721c24'
-                  }}>
-                    {booking.payment_status}
-                  </span>
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  <span style={{ 
-                    padding: '4px 8px', 
-                    borderRadius: '4px',
-                    backgroundColor: booking.status === 'Active' ? '#d4edda' : '#f8d7da',
-                    color: booking.status === 'Active' ? '#155724' : '#721c24'
-                  }}>
-                    {booking.status}
-                  </span>
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                  <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => openPaymentModal(booking)}
-                      style={{
-                        backgroundColor: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '10px'
-                      }}
-                    >
-                      💰 Payment
-                    </button>
-                    {booking.status === 'Active' && (
-                      <button
-                        onClick={() => openCancelModal(booking)}
+                        onClick={() => openPaymentModal(booking)}
                         style={{
-                          backgroundColor: '#dc3545',
+                          backgroundColor: '#28a745',
                           color: 'white',
                           border: 'none',
                           padding: '4px 8px',
@@ -319,12 +403,47 @@ const BookingList: React.FC = () => {
                           fontSize: '10px'
                         }}
                       >
-                        🚫 Cancel
+                        💰 Payment
                       </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
+                      {booking.status === 'Active' && (
+                        <button
+                          onClick={() => openCancelModal(booking)}
+                          style={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '10px'
+                          }}
+                        >
+
+                          🚫 Cancel
+                        </button>
+                      )}
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleDeleteBooking(booking.id)}
+                          style={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '10px',
+                            marginLeft: '5px',
+                            borderLeft: '1px solid white'
+                          }}
+                          title="Permanently Delete (Admin Only)"
+                        >
+                          🗑️ Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
               );
             })}
           </tbody>
@@ -361,7 +480,7 @@ const BookingList: React.FC = () => {
             <h3>Record Payment</h3>
             <p><strong>Passenger:</strong> {paymentModal.booking?.passenger_details.name}</p>
             <p><strong>Total Price:</strong> ₹{paymentModal.booking?.total_price || 0}</p>
-            
+
             <form onSubmit={handlePaymentSubmit}>
               <div style={{ marginBottom: '15px' }}>
                 <label>Amount Received:</label>
@@ -477,7 +596,7 @@ const BookingList: React.FC = () => {
                 )}
               </>
             )}
-            
+
             <form onSubmit={handleBookingCancellation}>
               <div style={{ marginBottom: '15px' }}>
                 <label>Cancellation Reason:</label>

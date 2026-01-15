@@ -20,6 +20,8 @@ interface Booking {
   pickup_point_name: string;
   total_price: number;
   is_volunteer?: boolean;
+  payment_status: string;
+  allow_unpaid_allocation?: boolean;
 }
 
 interface Payment {
@@ -115,8 +117,8 @@ const SeatAllocation: React.FC = () => {
 
   const getPaidBookings = () => {
     return bookings.filter(b => {
-      const payment = payments.find(p => p.booking === b.id);
-      return payment && parseFloat(payment.amount.toString()) > 0;
+      // Use the booking's payment_status field (set by backend) or allow_unpaid_allocation flag
+      return b.payment_status === 'Paid' || b.allow_unpaid_allocation;
     });
   };
 

@@ -46,91 +46,97 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       padding: '20px'
     }}>
       <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '16px',
         padding: '40px',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
         width: '100%',
-        maxWidth: '400px'
+
       }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <h1 style={{ 
-            color: '#333', 
-            fontSize: '2.5em', 
+          <h1 style={{
+            background: 'linear-gradient(45deg, #2575fc 0%, #6a11cb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontSize: '3em',
             margin: '0 0 10px 0',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            letterSpacing: '-1px'
           }}>🚌 BusSewa</h1>
-          <p style={{ color: '#666', margin: 0 }}>Bus Booking System - MSS 2025</p>
+          <p style={{ color: '#666', margin: 0, fontSize: '1.1em', fontWeight: 500 }}>Bus Booking System - MSS 2026</p>
         </div>
 
         <form onSubmit={handleLogin}>
-            <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '25px' }}>Login</h2>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
-                Username:
-              </label>
-              <input
-                type="text"
-                value={credentials.username}
-                onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  boxSizing: 'border-box'
-                }}
-                placeholder="Enter your username"
-              />
-            </div>
+          <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '25px' }}>Login</h2>
 
-            <div style={{ marginBottom: '25px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
-                Password:
-              </label>
-              <input
-                type="password"
-                value={credentials.password}
-                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  boxSizing: 'border-box'
-                }}
-                placeholder="Enter your password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
+              Username:
+            </label>
+            <input
+              type="text"
+              value={credentials.username}
+              onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+              required
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: loading ? '#ccc' : '#007bff',
-                color: 'white',
-                border: 'none',
+                border: '2px solid #ddd',
                 borderRadius: '6px',
                 fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                marginBottom: '15px'
+                boxSizing: 'border-box'
               }}
-            >
-              {loading ? '🔄 Logging in...' : '🔐 Login'}
-            </button>
+              placeholder="Enter your username"
+            />
+          </div>
 
-            <div style={{ textAlign: 'center', fontSize: '14px', color: '#666' }}>
-              Need an account? Contact your administrator.
-            </div>
-          </form>
+          <div style={{ marginBottom: '25px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
+              Password:
+            </label>
+            <input
+              type="password"
+              value={credentials.password}
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+              required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '16px',
+                boxSizing: 'border-box'
+              }}
+              placeholder="Enter your password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: loading ? '#ccc' : 'linear-gradient(45deg, #6a11cb 0%, #2575fc 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '15px',
+              transition: 'transform 0.2s',
+              boxShadow: '0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)'
+            }}
+          >
+            {loading ? '🔄 Logging in...' : '🔐 Login'}
+          </button>
+
+          <div style={{ textAlign: 'center', fontSize: '14px', color: '#666' }}>
+            Need an account? Contact your administrator.
+          </div>
+        </form>
 
         <div style={{
           marginTop: '30px',
@@ -140,9 +146,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           fontSize: '12px',
           color: '#666'
         }}>
-          <strong>User Management:</strong><br/>
-          • Admin creates all user accounts<br/>
-          • Access Django Admin at /admin/ to manage users<br/>
+          <strong>User Management:</strong><br />
+          • Admin creates all user accounts<br />
+          • Access Django Admin at /admin/ to manage users<br />
           • Roles: Admin (full access), Volunteer (most features), Viewer (read-only)
         </div>
       </div>

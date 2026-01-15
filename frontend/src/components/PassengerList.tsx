@@ -74,16 +74,28 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
     fetchPickupPoints();
   }, []);
 
-  const handleSearch = async () => {
-    if (searchTerm.trim()) {
-      try {
-        const response = await passengerAPI.search(searchTerm);
-        setPassengers(response.data);
-      } catch (error) {
-        console.error('Error searching passengers:', error);
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm.trim()) {
+        searchPassengers(searchTerm);
+      } else {
+        fetchPassengers();
       }
-    } else {
-      fetchPassengers();
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const searchPassengers = async (query: string) => {
+    try {
+      setLoading(true);
+      const response = await passengerAPI.search(query);
+      setPassengers(response.data);
+    } catch (error) {
+      console.error('Error searching passengers:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,19 +141,9 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ padding: '8px', flex: 1 }}
         />
-        <button
-          onClick={handleSearch}
-          style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none' }}
-        >
-          Search
-        </button>
-        <button
-          onClick={fetchPassengers}
-          style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none' }}
-        >
-          Show All
-        </button>
+        {/* Search is now dynamic via useEffect */}
       </div>
+
 
       {/* Table */}
       <div style={{ overflowX: 'auto' }}>
@@ -243,14 +245,16 @@ const PassengerList: React.FC<PassengerListProps> = ({ onNavigate }) => {
         </table>
       </div>
 
-      {passengers.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-          No passengers found. Add some passengers first!
-        </div>
-      )}
+      {
+        passengers.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+            No passengers found. Add some passengers first!
+          </div>
+        )
+      }
 
 
-    </div>
+    </div >
   );
 };
 

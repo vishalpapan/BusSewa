@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 3.1 - Security Update (January 2026)
+
+### 🔒 Security & Management
+- ✅ **Delete Booking Feature**: Admins can now permanently delete bookings.
+- ✅ **Role-Based Access Control**: Strict enforcement of Admin vs Volunteer permissions.
+- ✅ **Secure API**: All booking endpoints now require authentication.
+- ✅ **HTTPS Guide**: Added documentation for SSL setup with custom domains.
+
+---
+
 ## Version 2.0 - Latest Update (December 2025)
 
 ### 🎉 New Features

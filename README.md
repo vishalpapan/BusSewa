@@ -1,4 +1,4 @@
-# BusSewa - Bus Booking System v3.0
+# BusSewa - Bus Booking System v3.1
 
 A journey-based bus booking and passenger management system built with Django REST Framework and React.
 
@@ -10,6 +10,8 @@ A journey-based bus booking and passenger management system built with Django RE
 - **Volunteer Management**: Assign volunteers and track their status.
 - **Attendance Tracking**: Mark presence/absence and shift passengers between buses.
 - **Enhanced Export**: Include volunteer status and attendance data.
+- **Delete Management**: Admin-only feature to permanently delete bookings.
+- **Secure API**: Role-based access control for all operations.
 - Real-time booking management with conflict prevention
 - Admin dashboard with journey statistics
 
@@ -117,6 +119,13 @@ python manage_data.py import < backup.json
 
 See ARCHITECTURE.md for detailed deployment guide.
 
+## HTTPS / SSL Configuration (Important)
+AWS EC2 DNS addresses (`ec2-xx...amazonaws.com`) **do not support free SSL (Let's Encrypt)** directly. To enable HTTPS:
+1.  **Purchase a Domain**: Buy a domain (e.g., `mybussewa.com`) from Godaddy/Namecheap (~$10/yr).
+2.  **Point to AWS**: Create an `A Record` in your domain DNS content pointing to your AWS Elastic IP.
+3.  **Install SSL**: SSH into the server and run `sudo certbot --nginx -d mybussewa.com`.
+4.  **Done**: Your site will now be secure (`https://mybussewa.com`).
+
 ## Version 3.0 Features (New)
 
 - **Volunteer Designation**: Mark passengers as volunteers with visual indicators.
@@ -134,4 +143,4 @@ See ARCHITECTURE.md for detailed deployment guide.
 
 ---
 
-**Built for MSS 2026** | **Version 3.0** | **Production Ready**
+**Built for MSS 2026** | **Version 3.1** | **Production Ready**

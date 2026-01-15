@@ -18,6 +18,11 @@ interface DashboardStats {
     bookings: number;
     revenue: number;
   }>;
+  categoryStats: {
+    Sewadal: number;
+    Satsang: number;
+    Balsewadal: number;
+  };
 }
 
 const Dashboard: React.FC = () => {
@@ -33,6 +38,7 @@ const Dashboard: React.FC = () => {
     onwardRevenue: 0,
     returnRevenue: 0,
     journeyStats: [],
+    categoryStats: { Sewadal: 0, Satsang: 0, Balsewadal: 0 },
   });
   const [loading, setLoading] = useState(true);
 
@@ -72,14 +78,14 @@ const Dashboard: React.FC = () => {
 
       // Journey-wise statistics
       const journeyStats = journeys.map((journey: any) => {
-        const journeyBookings = bookings.filter((b: any) => 
+        const journeyBookings = bookings.filter((b: any) =>
           (journey.journey_type === 'ONWARD' && b.onward_journey == journey.id) ||
           (journey.journey_type === 'RETURN' && b.return_journey == journey.id)
         );
-        const journeyRevenue = journeyBookings.reduce((sum: number, b: any) => 
+        const journeyRevenue = journeyBookings.reduce((sum: number, b: any) =>
           sum + parseFloat(journey.journey_type === 'ONWARD' ? (b.onward_price || 0) : (b.return_price || 0)), 0
         );
-        
+
         return {
           date: new Date(journey.journey_date).toLocaleDateString('en-IN'),
           type: journey.journey_type,
@@ -87,6 +93,13 @@ const Dashboard: React.FC = () => {
           revenue: journeyRevenue
         };
       });
+
+      // Calculate Category Stats
+      const categoryStats = {
+        Sewadal: passengers.filter((p: any) => p.category === 'Sewadal').length,
+        Satsang: passengers.filter((p: any) => p.category === 'Satsang').length,
+        Balsewadal: passengers.filter((p: any) => p.category === 'Balsewadal').length,
+      };
 
       setStats({
         totalPassengers: passengers.length,
@@ -100,6 +113,7 @@ const Dashboard: React.FC = () => {
         onwardRevenue,
         returnRevenue,
         journeyStats,
+        categoryStats,
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -131,7 +145,7 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ maxWidth: '1200px', margin: '20px auto', padding: '20px' }}>
       <h2 style={{ marginBottom: '30px', textAlign: 'center' }}>BusSewa Dashboard</h2>
-      
+
       {/* Stats Grid */}
       <div style={{
         display: 'grid',
@@ -189,6 +203,31 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
+      {/* Category Statistics */}
+      <div style={{
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        marginBottom: '20px'
+      }}>
+        <h3 style={{ marginBottom: '20px' }}>Passenger Category Distribution</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+          <div style={{ padding: '15px', backgroundColor: '#e3f2fd', borderRadius: '8px', textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 10px 0', color: '#1565c0' }}>Sewadal</h4>
+            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.categoryStats?.Sewadal || 0}</div>
+          </div>
+          <div style={{ padding: '15px', backgroundColor: '#f3e5f5', borderRadius: '8px', textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 10px 0', color: '#7b1fa2' }}>Satsang</h4>
+            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.categoryStats?.Satsang || 0}</div>
+          </div>
+          <div style={{ padding: '15px', backgroundColor: '#e8f5e9', borderRadius: '8px', textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 10px 0', color: '#2e7d32' }}>Balsewadal</h4>
+            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.categoryStats?.Balsewadal || 0}</div>
+          </div>
+        </div>
+      </div>
+
       {/* Journey Statistics */}
       <div style={{
         backgroundColor: 'white',
@@ -198,14 +237,14 @@ const Dashboard: React.FC = () => {
         marginBottom: '20px'
       }}>
         <h3 style={{ marginBottom: '20px' }}>Journey-wise Statistics</h3>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
           <div>
             <h4 style={{ color: '#6f42c1', marginBottom: '10px' }}>Onward Journey</h4>
             <p>🎫 <strong>{stats.onwardBookings}</strong> bookings</p>
             <p>💰 <strong>₹{stats.onwardRevenue.toLocaleString()}</strong> revenue</p>
           </div>
-          
+
           <div>
             <h4 style={{ color: '#fd7e14', marginBottom: '10px' }}>Return Journey</h4>
             <p>🎫 <strong>{stats.returnBookings}</strong> bookings</p>
@@ -244,7 +283,7 @@ const Dashboard: React.FC = () => {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
         <h3 style={{ marginBottom: '20px' }}>Quick Summary</h3>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
           <div>
             <h4 style={{ color: '#007bff', marginBottom: '10px' }}>Registration Status</h4>
@@ -252,7 +291,7 @@ const Dashboard: React.FC = () => {
             <p>🎫 <strong>{stats.totalBookings}</strong> bookings created</p>
             <p>📈 <strong>{((stats.totalBookings / Math.max(stats.totalPassengers, 1)) * 100).toFixed(1)}%</strong> booking rate</p>
           </div>
-          
+
           <div>
             <h4 style={{ color: '#28a745', marginBottom: '10px' }}>Payment Status</h4>
             <p>💰 <strong>₹{stats.totalRevenue.toLocaleString()}</strong> collected</p>
@@ -263,10 +302,10 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Action Buttons */}
-      <div style={{ 
-        marginTop: '30px', 
-        display: 'flex', 
-        gap: '15px', 
+      <div style={{
+        marginTop: '30px',
+        display: 'flex',
+        gap: '15px',
         justifyContent: 'center',
         flexWrap: 'wrap'
       }}>

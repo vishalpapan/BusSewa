@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { bookingAPI, passengerAPI, pickupPointAPI } from '../services/api';
 
 interface Passenger {
   id: number;
   name: string;
   age_criteria: string;
+  mobile_no?: string; // Added for display context
 }
 
 interface PickupPoint {
@@ -47,10 +48,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [pricing, setPricing] = useState<JourneyPricing[]>([]);
   const [loading, setLoading] = useState(false);
+  const [passengerSearch, setPassengerSearch] = useState('');
   const [calculatedPrice, setCalculatedPrice] = useState({ onward: 0, return: 0, total: 0 });
 
   useEffect(() => {
-    fetchPassengers();
+    // fetchPassengers is handled by the search effect
     fetchPickupPoints();
     fetchJourneys();
     fetchPricing();
@@ -76,9 +78,25 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
     }
   };
 
-  const fetchPassengers = async () => {
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchPassengers(passengerSearch);
+    }, 500); // Debounce search by 500ms
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [passengerSearch]);
+
+  const fetchPassengers = async (query: string = '') => {
     try {
-      const response = await passengerAPI.getAll();
+      let response;
+      if (query) {
+        response = await passengerAPI.search(query);
+      } else {
+        // Optionally don't load all passengers initially if list is huge,
+        // but for now let's keep it to show some defaults or just top 10/20 if API supported pagination
+        response = await passengerAPI.getAll();
+      }
       setPassengers(response.data);
     } catch (error) {
       console.error('Error fetching passengers:', error);
@@ -170,19 +188,29 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
           <label>Select Passenger:</label>
+          {/* Search Input for Passenger */}
+          <input
+            type="text"
+            placeholder="Search passenger by name..."
+            value={passengerSearch}
+            onChange={(e) => setPassengerSearch(e.target.value)}
+            style={{ width: '100%', padding: '8px', marginTop: '5px', marginBottom: '5px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          />
           <select
             name="passenger"
             value={formData.passenger}
             onChange={handleChange}
             required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            style={{ width: '100%', padding: '8px' }}
           >
             <option value="">Choose a passenger</option>
-            {passengers.map((passenger) => (
-              <option key={passenger.id} value={passenger.id}>
-                {passenger.name} - {passenger.age_criteria}
-              </option>
-            ))}
+            {passengers
+              .filter(p => p.name.toLowerCase().includes(passengerSearch.toLowerCase()))
+              .map((passenger) => (
+                <option key={passenger.id} value={passenger.id}>
+                  {passenger.name} - {passenger.age_criteria}
+                </option>
+              ))}
           </select>
         </div>
 

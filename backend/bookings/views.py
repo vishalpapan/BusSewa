@@ -1,10 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
-from .models import Booking, Payment, PickupPoint, Bus, SeatCancellation
-from .serializers import BookingSerializer, PaymentSerializer, PickupPointSerializer, BusSerializer, SeatCancellationSerializer
+from .models import Booking, Payment, PickupPoint, Bus, SeatCancellation, OnSpotPassenger
+from .serializers import BookingSerializer, PaymentSerializer, PickupPointSerializer, BusSerializer, SeatCancellationSerializer, OnSpotPassengerSerializer
 
 class PickupPointViewSet(viewsets.ModelViewSet):
     queryset = PickupPoint.objects.all()
@@ -14,7 +14,13 @@ class PickupPointViewSet(viewsets.ModelViewSet):
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    permission_classes = [AllowAny]  # Temporarily allow all for testing
+    permission_classes = [IsAuthenticated]
+    
+    def destroy(self, request, *args, **kwargs):
+        """Delete a booking - Admin only"""
+        if request.user.role != 'admin':
+            return Response({'error': 'Only admins can delete bookings'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
     
     def perform_create(self, serializer):
         # For now, save without user (we'll add auth later)
@@ -140,3 +146,32 @@ class SeatCancellationViewSet(viewsets.ModelViewSet):
         
         cancellation.save()
         return Response({'message': 'Refund marked as processed'})
+
+
+class OnSpotPassengerViewSet(viewsets.ModelViewSet):
+    queryset = OnSpotPassenger.objects.all()
+    serializer_class = OnSpotPassengerSerializer
+    permission_classes = [AllowAny]  # Temporarily allow all for testing
+    
+    @action(detail=False, methods=['get'])
+    def by_bus(self, request):
+        """Get on-spot passengers for a specific bus and journey type"""
+        bus_id = request.query_params.get('bus_id')
+        journey_type = request.query_params.get('journey_type')
+        
+        if not bus_id:
+            return Response({'error': 'bus_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        passengers = OnSpotPassenger.objects.filter(bus_id=bus_id)
+        if journey_type:
+            passengers = passengers.filter(journey_type=journey_type)
+        
+        serializer = self.get_serializer(passengers, many=True)
+        return Response(serializer.data)
+    
+    def perform_create(self, serializer):
+        """Auto-calculate price on create"""
+        instance = serializer.save()
+        # Price is auto-calculated in model save method
+        return instance
+

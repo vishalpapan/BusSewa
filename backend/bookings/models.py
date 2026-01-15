@@ -211,3 +211,94 @@ class SeatCancellation(models.Model):
     
     def __str__(self):
         return f"Cancelled: {self.booking.passenger.name} - {self.journey_type}"
+
+
+class OnSpotPassenger(models.Model):
+    """Passengers who show up on-the-spot without prior reservation (standing passengers)"""
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+    ]
+    
+    PAYMENT_STATUS_CHOICES = [
+        ('Paid', 'Paid'),
+        ('Pending', 'Pending'),
+    ]
+    
+    JOURNEY_TYPE_CHOICES = [
+        ('ONWARD', 'Onward'),
+        ('RETURN', 'Return'),
+    ]
+    
+    # Basic Info
+    name = models.CharField(max_length=100)
+    age = models.IntegerField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    mobile_no = models.CharField(max_length=15, blank=True)
+    
+    # Journey assignment
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, related_name='onspot_passengers')
+    journey_type = models.CharField(max_length=10, choices=JOURNEY_TYPE_CHOICES)
+    
+    # Payment
+    calculated_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
+    
+    # Tracking
+    attendance = models.BooleanField(default=True, help_text="On-spot passengers are present by default")
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def calculate_age_criteria(self):
+        """Determine age criteria based on age and gender"""
+        if self.gender == 'M':
+            if self.age <= 12:
+                return 'M-12 & Below'
+            elif self.age >= 75:
+                return 'M&F-75 & Above'
+            elif self.age >= 65:
+                return 'M-65 & Above'
+            else:
+                return 'M-Above 12 & Below 65'
+        else:  # Female
+            if self.age <= 12:
+                return 'F-12 & Below'
+            elif self.age >= 75:
+                return 'M&F-75 & Above'
+            else:
+                return 'F-Above 12 & Below 75'
+    
+    def calculate_price(self):
+        """Calculate price based on age criteria using JourneyPricing"""
+        age_criteria = self.calculate_age_criteria()
+        try:
+            pricing = JourneyPricing.objects.get(
+                journey_type=self.journey_type,
+                age_criteria=age_criteria,
+                is_active=True
+            )
+            return pricing.amount
+        except JourneyPricing.DoesNotExist:
+            # Fallback pricing
+            if '12 & Below' in age_criteria:
+                return 290.00
+            elif '65 & Above' in age_criteria or 'Below 75' in age_criteria:
+                return 290.00
+            elif '75 & Above' in age_criteria:
+                return 0.00
+            else:
+                return 550.00
+    
+    def save(self, *args, **kwargs):
+        # Auto-calculate price if not set
+        if not self.calculated_price or self.calculated_price == 0:
+            self.calculated_price = self.calculate_price()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"On-Spot: {self.name} - Bus {self.bus.bus_number} ({self.journey_type})"
+    
+    class Meta:
+        ordering = ['-created_at']
+

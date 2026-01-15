@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Journey, JourneyPricing, Bus, Booking, Payment, SeatCancellation, PickupPoint
+from .models import Journey, JourneyPricing, Bus, Booking, Payment, SeatCancellation, PickupPoint, OnSpotPassenger
 from passengers.models import Passenger
 from authentication.serializers import UserSerializer
 
@@ -89,3 +89,16 @@ class SeatCancellationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeatCancellation
         fields = '__all__'
+
+
+class OnSpotPassengerSerializer(serializers.ModelSerializer):
+    bus_details = BusSerializer(source='bus', read_only=True)
+    age_criteria = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = OnSpotPassenger
+        fields = '__all__'
+    
+    def get_age_criteria(self, obj):
+        return obj.calculate_age_criteria()
+
