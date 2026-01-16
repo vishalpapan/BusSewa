@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { bookingAPI, paymentAPI, volunteerAPI } from '../services/api';
+import { bookingAPI, paymentAPI, volunteerAPI, busAPI, pickupPointAPI } from '../services/api';
+import api from '../services/api';
 
 interface Booking {
   id: number;
@@ -41,6 +42,9 @@ interface Booking {
     id: number;
     bus_number: string;
   };
+  onward_journey?: number;
+  return_journey?: number;
+  pickup_point?: number;
 }
 
 
@@ -82,6 +86,24 @@ const BookingList: React.FC = () => {
     notes: ''
   });
 
+  const [journeys, setJourneys] = useState<any[]>([]);
+  const [pickupPoints, setPickupPoints] = useState<any[]>([]);
+  const [editModal, setEditModal] = useState<{ show: boolean; booking: Booking | null }>({
+    show: false,
+    booking: null
+  });
+  const [editData, setEditData] = useState({
+    journey_type: 'BOTH',
+    onward_journey: '',
+    return_journey: '',
+    onward_bus: '',
+    return_bus: '',
+    pickup_point: '',
+  });
+
+  // Calculate duplicate names
+  const [duplicateNames, setDuplicateNames] = useState<Set<string>>(new Set());
+
 
 
 
@@ -89,8 +111,25 @@ const BookingList: React.FC = () => {
   useEffect(() => {
     fetchBookings();
     fetchBuses();
+    fetchJourneys();
+    fetchPickupPoints();
     checkUserRole();
   }, []);
+
+  useEffect(() => {
+    // Recalculate duplicates when bookings change
+    const counts: { [key: string]: number } = {};
+    bookings.forEach(b => {
+      if (b.status === 'Active') {
+        counts[b.passenger_details.name] = (counts[b.passenger_details.name] || 0) + 1;
+      }
+    });
+    const dupes = new Set<string>();
+    for (const name in counts) {
+      if (counts[name] > 1) dupes.add(name);
+    }
+    setDuplicateNames(dupes);
+  }, [bookings]);
 
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -108,11 +147,28 @@ const BookingList: React.FC = () => {
 
   const fetchBuses = async () => {
     try {
-      const response = await fetch('/api/buses/', { credentials: 'include' });
-      const data = await response.json();
-      setBuses(data);
+      const response = await busAPI.getAll();
+      setBuses(response.data);
     } catch (error) {
       console.error('Error fetching buses:', error);
+    }
+  };
+
+  const fetchJourneys = async () => {
+    try {
+      const response = await api.get('/journeys/');
+      setJourneys(response.data);
+    } catch (error) {
+      console.error('Error fetching journeys:', error);
+    }
+  };
+
+  const fetchPickupPoints = async () => {
+    try {
+      const response = await pickupPointAPI.getAll();
+      setPickupPoints(response.data);
+    } catch (error) {
+      console.error('Error fetching pickup points:', error);
     }
   };
 
@@ -207,6 +263,44 @@ const BookingList: React.FC = () => {
     }
   };
 
+  const openEditModal = (booking: Booking) => {
+    setEditModal({ show: true, booking });
+    setEditData({
+      journey_type: booking.journey_type,
+      onward_journey: booking.onward_journey ? booking.onward_journey.toString() : '',
+      return_journey: booking.return_journey ? booking.return_journey.toString() : '',
+      onward_bus: booking.onward_bus_details ? booking.onward_bus_details.id.toString() : '',
+      return_bus: booking.return_bus_details ? booking.return_bus_details.id.toString() : '',
+      pickup_point: booking.pickup_point ? booking.pickup_point.toString() : '',
+    });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editModal.booking) return;
+
+    try {
+      await bookingAPI.update(editModal.booking.id, editData);
+      alert('Booking updated successfully!');
+      setEditModal({ show: false, booking: null });
+      fetchBookings();
+    } catch (error: any) {
+      alert('Error updating booking: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  // Helper to filter buses by journey
+  const getBusesForJourney = (journeyId: string) => {
+    if (!journeyId) return [];
+    const journey = journeys.find(j => j.id.toString() === journeyId);
+    if (!journey) return [];
+
+    // Filter buses that belong to this journey (using backend logic replication or just general list if not strict)
+    // The backend filters buses by journey_id. Here we have all buses.
+    // If bus has journey_details, check id.
+    return buses.filter(b => b.journey_details && b.journey_details.id.toString() === journeyId);
+  };
+
   const closePaymentModal = () => {
     setPaymentModal({ show: false, booking: null });
     setPaymentData({ amount: '', payment_method: 'Cash', collected_by: '', payment_received_date: new Date().toISOString().split('T')[0] });
@@ -273,6 +367,7 @@ const BookingList: React.FC = () => {
             <tr style={{ backgroundColor: '#f8f9fa' }}>
               <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Passenger</th>
               <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Mobile</th>
+              <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Journey Dates</th>
               <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Volunteer</th>
               <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Seat/Bus</th>
               <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Amount</th>
@@ -301,11 +396,26 @@ const BookingList: React.FC = () => {
                 <tr key={booking.id}>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                     <strong>{booking.passenger_details.name}</strong>
+                    {duplicateNames.has(booking.passenger_details.name) && booking.status === 'Active' && (
+                      <span title="Potential Duplicate Booking" style={{ marginLeft: '5px', cursor: 'help' }}>⚠️</span>
+                    )}
                     <br />
                     <small>{booking.passenger_details.age_criteria}</small>
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                     {booking.passenger_details.mobile_no}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', fontSize: '13px' }}>
+                    {booking.onward_journey_details && (
+                      <div>
+                        <strong>Onward:</strong> {new Date(booking.onward_journey_details.journey_date).toLocaleDateString('en-IN')}
+                      </div>
+                    )}
+                    {booking.return_journey_details && (
+                      <div>
+                        <strong>Return:</strong> {new Date(booking.return_journey_details.journey_date).toLocaleDateString('en-IN')}
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                     {booking.assigned_volunteer_details ?
@@ -404,6 +514,20 @@ const BookingList: React.FC = () => {
                         }}
                       >
                         💰 Payment
+                      </button>
+                      <button
+                        onClick={() => openEditModal(booking)}
+                        style={{
+                          backgroundColor: '#ffc107',
+                          color: 'black',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '10px'
+                        }}
+                      >
+                        ✏️ Edit
                       </button>
                       {booking.status === 'Active' && (
                         <button
@@ -661,6 +785,162 @@ const BookingList: React.FC = () => {
                   }}
                 >
                   Cancel Booking
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Booking Modal */}
+      {editModal.show && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            width: '500px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3>Edit Booking</h3>
+            <p><strong>Passenger:</strong> {editModal.booking?.passenger_details.name}</p>
+
+            <form onSubmit={handleEditSubmit}>
+              <div style={{ marginBottom: '15px' }}>
+                <label>Journey Type:</label>
+                <select
+                  value={editData.journey_type}
+                  onChange={(e) => setEditData({ ...editData, journey_type: e.target.value })}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                >
+                  <option value="ONWARD">Onward Only</option>
+                  <option value="RETURN">Return Only</option>
+                  <option value="BOTH">Both Onward & Return</option>
+                </select>
+              </div>
+
+              {(editData.journey_type === 'ONWARD' || editData.journey_type === 'BOTH') && (
+                <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e7f3ff', borderRadius: '4px' }}>
+                  <h4>Onward Journey</h4>
+                  <label>Date:</label>
+                  <select
+                    value={editData.onward_journey}
+                    onChange={(e) => setEditData({ ...editData, onward_journey: e.target.value, onward_bus: '' })}
+                    style={{ width: '100%', padding: '8px', marginTop: '5px', marginBottom: '10px' }}
+                    required
+                  >
+                    <option value="">Select Onward Date</option>
+                    {journeys.filter(j => j.journey_type === 'ONWARD').map(j => (
+                      <option key={j.id} value={j.id}>
+                        {new Date(j.journey_date).toLocaleDateString('en-IN')}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label>Bus:</label>
+                  <select
+                    value={editData.onward_bus}
+                    onChange={(e) => setEditData({ ...editData, onward_bus: e.target.value })}
+                    style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                  >
+                    <option value="">Any / Unassigned</option>
+                    {getBusesForJourney(editData.onward_journey).map(b => (
+                      <option key={b.id} value={b.id}>
+                        Bus {b.bus_number} (Cap: {b.capacity})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(editData.journey_type === 'RETURN' || editData.journey_type === 'BOTH') && (
+                <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e7f3ff', borderRadius: '4px' }}>
+                  <h4>Return Journey</h4>
+                  <label>Date:</label>
+                  <select
+                    value={editData.return_journey}
+                    onChange={(e) => setEditData({ ...editData, return_journey: e.target.value, return_bus: '' })}
+                    style={{ width: '100%', padding: '8px', marginTop: '5px', marginBottom: '10px' }}
+                    required
+                  >
+                    <option value="">Select Return Date</option>
+                    {journeys.filter(j => j.journey_type === 'RETURN').map(j => (
+                      <option key={j.id} value={j.id}>
+                        {new Date(j.journey_date).toLocaleDateString('en-IN')}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label>Bus:</label>
+                  <select
+                    value={editData.return_bus}
+                    onChange={(e) => setEditData({ ...editData, return_bus: e.target.value })}
+                    style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                  >
+                    <option value="">Any / Unassigned</option>
+                    {getBusesForJourney(editData.return_journey).map(b => (
+                      <option key={b.id} value={b.id}>
+                        Bus {b.bus_number} (Cap: {b.capacity})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div style={{ marginBottom: '15px' }}>
+                <label>Pickup Point:</label>
+                <select
+                  value={editData.pickup_point}
+                  onChange={(e) => setEditData({ ...editData, pickup_point: e.target.value })}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                >
+                  <option value="">Select Pickup Point</option>
+                  {pickupPoints.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditModal({ show: false, booking: null })}
+                  style={{
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Save Changes
                 </button>
               </div>
             </form>
