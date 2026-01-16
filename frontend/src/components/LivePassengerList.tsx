@@ -404,9 +404,7 @@ const LivePassengerList: React.FC = () => {
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Bus</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Amount</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Status</th>
-              {userRole === 'admin' && (
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Actions</th>
-              )}
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -474,26 +472,24 @@ const LivePassengerList: React.FC = () => {
                       {status.text}
                     </span>
                   </td>
-                  {userRole === 'admin' && (
-                    <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                      <button
-                        onClick={() => handleCancelBooking(passenger)}
-                        disabled={!passenger.booking || passenger.booking.status === 'Cancelled'}
-                        style={{
-                          backgroundColor: !passenger.booking || passenger.booking.status === 'Cancelled' ? '#ccc' : '#ffc107',
-                          color: 'black',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          cursor: !passenger.booking || passenger.booking.status === 'Cancelled' ? 'not-allowed' : 'pointer',
-                          fontSize: '12px'
-                        }}
-                        title="Cancel booking"
-                      >
-                        🚫 Cancel
-                      </button>
-                    </td>
-                  )}
+                  <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                    <button
+                      onClick={() => handleCancelBooking(passenger)}
+                      disabled={!passenger.booking || passenger.booking.status === 'Cancelled'}
+                      style={{
+                        backgroundColor: !passenger.booking || passenger.booking.status === 'Cancelled' ? '#ccc' : '#ffc107',
+                        color: 'black',
+                        border: 'none',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        cursor: !passenger.booking || passenger.booking.status === 'Cancelled' ? 'not-allowed' : 'pointer',
+                        fontSize: '12px'
+                      }}
+                      title="Cancel booking"
+                    >
+                      🚫 Cancel
+                    </button>
+                  </td>
                 </tr>
               );
             })}
