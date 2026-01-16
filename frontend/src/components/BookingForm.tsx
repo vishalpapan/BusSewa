@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { bookingAPI, passengerAPI, pickupPointAPI } from '../services/api';
+import { bookingAPI, passengerAPI, pickupPointAPI, busAPI } from '../services/api';
 
 interface Passenger {
   id: number;
@@ -29,6 +29,13 @@ interface JourneyPricing {
   is_active: boolean;
 }
 
+interface Bus {
+  id: number;
+  bus_number: string;
+  journey: number;
+  capacity: number;
+}
+
 interface BookingFormProps {
   initialPassengerId?: number | null;
 }
@@ -41,6 +48,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
     return_journey: '',
     pickup_point: '',
     remarks: '',
+    onward_bus: '',
+    return_bus: '',
   });
 
   const [passengers, setPassengers] = useState<Passenger[]>([]);
@@ -50,6 +59,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
   const [loading, setLoading] = useState(false);
   const [passengerSearch, setPassengerSearch] = useState('');
   const [calculatedPrice, setCalculatedPrice] = useState({ onward: 0, return: 0, total: 0 });
+  const [onwardBuses, setOnwardBuses] = useState<Bus[]>([]);
+  const [returnBuses, setReturnBuses] = useState<Bus[]>([]);
 
   useEffect(() => {
     // fetchPassengers is handled by the search effect
@@ -86,6 +97,53 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
 
     return () => clearTimeout(delayDebounceFn);
   }, [passengerSearch]);
+
+  // Fetch buses when onward journey changes
+  useEffect(() => {
+    if (formData.onward_journey) {
+      fetchBuses(formData.onward_journey, 'ONWARD');
+    } else {
+      setOnwardBuses([]);
+    }
+  }, [formData.onward_journey]);
+
+  // Fetch buses when return journey changes
+  useEffect(() => {
+    if (formData.return_journey) {
+      fetchBuses(formData.return_journey, 'RETURN');
+    } else {
+      setReturnBuses([]);
+    }
+  }, [formData.return_journey]);
+
+  const fetchBuses = async (journeyId: string, type: 'ONWARD' | 'RETURN') => {
+    try {
+      const response = await busAPI.getAll(); // Or use a filter endpoint if available directly by journey_id
+      // Since busAPI.getAll() returns all buses, we should filter them here or use a query parameter.
+      // Looking at the implementation plan, BusViewSet supports journey_id filter.
+      // busAPI.getAll() in api.js just calls /api/buses/.
+      // Let's manually fetch with query params or filter client side if the list is small.
+      // Better: use axios directly or update api.js.
+      // For now, I'll assume valid buses are returned and filter client side if needed,
+      // but strictly speaking we should use the API filter.
+
+      // Using fetch directly to support query params without modifying api.js for now,
+      // or we can use the existing getAll if it doesn't take args.
+      // api.js busAPI.getAll takes no args.
+      // Let's use axios instance if exposed or just fetch.
+
+      const res = await fetch(`/api/buses/?journey_id=${journeyId}`, { credentials: 'include' });
+      const data = await res.json();
+      if (type === 'ONWARD') {
+        setOnwardBuses(data);
+      } else {
+        setReturnBuses(data);
+      }
+    } catch (error) {
+      console.error(`Error fetching ${type} buses:`, error);
+    }
+  };
+
 
   const fetchPassengers = async (query: string = '') => {
     try {
@@ -170,10 +228,14 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
         return_journey: '',
         pickup_point: '',
         remarks: '',
+        onward_bus: '',
+        return_bus: '',
       });
       setCalculatedPrice({ onward: 0, return: 0, total: 0 });
+      setPassengerSearch('');
     } catch (error: any) {
       alert('Error creating booking: ' + (error.message || 'Unknown error'));
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -267,6 +329,26 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
                 </option>
               ))}
             </select>
+
+            {/* Onward Bus Selection */}
+            {formData.onward_journey && (
+              <div style={{ marginTop: '10px' }}>
+                <label style={{ fontSize: '0.9em', color: '#666' }}>Assign Bus (Optional):</label>
+                <select
+                  name="onward_bus"
+                  value={formData.onward_bus}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                >
+                  <option value="">Select bus (Auto-assign if empty)</option>
+                  {onwardBuses.map((bus) => (
+                    <option key={bus.id} value={bus.id}>
+                      Bus {bus.bus_number} (Cap: {bus.capacity})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
 
@@ -287,6 +369,26 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
                 </option>
               ))}
             </select>
+
+            {/* Return Bus Selection */}
+            {formData.return_journey && (
+              <div style={{ marginTop: '10px' }}>
+                <label style={{ fontSize: '0.9em', color: '#666' }}>Assign Bus (Optional):</label>
+                <select
+                  name="return_bus"
+                  value={formData.return_bus}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                >
+                  <option value="">Select bus (Auto-assign if empty)</option>
+                  {returnBuses.map((bus) => (
+                    <option key={bus.id} value={bus.id}>
+                      Bus {bus.bus_number} (Cap: {bus.capacity})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
 
