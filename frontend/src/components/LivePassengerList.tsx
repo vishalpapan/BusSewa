@@ -43,13 +43,28 @@ const LivePassengerList: React.FC = () => {
   });
   const [buses, setBuses] = useState<any[]>([]);
 
+  const [userRole, setUserRole] = useState<string>('');
+
   useEffect(() => {
+    fetchUserData();
     fetchAllData();
   }, []);
 
   useEffect(() => {
     applyFilters();
   }, [passengers, filters]);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/current-user/');
+      if (response.ok) {
+        const data = await response.json();
+        setUserRole(data.role);
+      }
+    } catch (error) {
+      console.error('Error fetching user data', error);
+    }
+  };
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -233,20 +248,7 @@ const LivePassengerList: React.FC = () => {
         </button>
       </div>
 
-      {/* Admin Warning */}
-      <div style={{
-        backgroundColor: '#fff3cd',
-        border: '1px solid #ffeaa7',
-        borderRadius: '8px',
-        padding: '15px',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>⚠️ Admin Functions</h3>
-        <p style={{ margin: 0, color: '#856404', fontSize: '14px' }}>
-          Delete functionality is currently available to all users. In production, this will be restricted to admin users only.
-          Deleting a passenger will remove all associated bookings, payments, and seat assignments.
-        </p>
-      </div>
+
 
       {/* Filters */}
       <div style={{
@@ -402,7 +404,9 @@ const LivePassengerList: React.FC = () => {
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Bus</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Amount</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Status</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Actions</th>
+              {userRole === 'admin' && (
+                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Actions</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -470,24 +474,26 @@ const LivePassengerList: React.FC = () => {
                       {status.text}
                     </span>
                   </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                    <button
-                      onClick={() => handleCancelBooking(passenger)}
-                      disabled={!passenger.booking || passenger.booking.status === 'Cancelled'}
-                      style={{
-                        backgroundColor: !passenger.booking || passenger.booking.status === 'Cancelled' ? '#ccc' : '#ffc107',
-                        color: 'black',
-                        border: 'none',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        cursor: !passenger.booking || passenger.booking.status === 'Cancelled' ? 'not-allowed' : 'pointer',
-                        fontSize: '12px'
-                      }}
-                      title="Cancel booking"
-                    >
-                      🚫 Cancel
-                    </button>
-                  </td>
+                  {userRole === 'admin' && (
+                    <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                      <button
+                        onClick={() => handleCancelBooking(passenger)}
+                        disabled={!passenger.booking || passenger.booking.status === 'Cancelled'}
+                        style={{
+                          backgroundColor: !passenger.booking || passenger.booking.status === 'Cancelled' ? '#ccc' : '#ffc107',
+                          color: 'black',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          cursor: !passenger.booking || passenger.booking.status === 'Cancelled' ? 'not-allowed' : 'pointer',
+                          fontSize: '12px'
+                        }}
+                        title="Cancel booking"
+                      >
+                        🚫 Cancel
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}

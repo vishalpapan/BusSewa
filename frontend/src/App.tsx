@@ -129,7 +129,7 @@ function App() {
             }}>{APP_CONFIG.APP_SUBTITLE}</p>
           </div>
           <div style={{ color: 'white', textAlign: 'right' }}>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>Welcome, {user.username}</div>
+            <div style={{ fontSize: '14px', opacity: 0.9 }}>Welcome, {user.username} ({user.role})</div>
             <button
               onClick={handleLogout}
               style={{
@@ -153,73 +153,89 @@ function App() {
           flexWrap: 'wrap',
           gap: '8px'
         }}>
+          {/* Always Visible */}
           <button
             onClick={() => handleTabChange('dashboard')}
             style={navButtonStyle('dashboard')}
           >
             📊 Dashboard
           </button>
-          <button
-            onClick={() => handleTabChange('add')}
-            style={navButtonStyle('add')}
-          >
-            Add Passenger
-          </button>
-          <button
-            onClick={() => handleTabChange('import')}
-            style={navButtonStyle('import')}
-          >
-            📥 Import Data
-          </button>
-          <button
-            onClick={() => handleTabChange('list')}
-            style={navButtonStyle('list')}
-          >
-            View Passengers
-          </button>
-          <button
-            onClick={() => handleTabChange('booking')}
-            style={navButtonStyle('booking')}
-          >
-            Create Booking
-          </button>
-          <button
-            onClick={() => handleTabChange('bookings')}
-            style={navButtonStyle('bookings')}
-          >
-            View Bookings
-          </button>
-          <button
-            onClick={() => handleTabChange('seats')}
-            style={navButtonStyle('seats')}
-          >
-            🚌 Seat Allocation
-          </button>
+
+          {/* Admin Only */}
+          {user.role === 'admin' && (
+            <>
+              <button
+                onClick={() => handleTabChange('add')}
+                style={navButtonStyle('add')}
+              >
+                Add Passenger
+              </button>
+              <button
+                onClick={() => handleTabChange('import')}
+                style={navButtonStyle('import')}
+              >
+                📥 Import Data
+              </button>
+              <button
+                onClick={() => handleTabChange('list')}
+                style={navButtonStyle('list')}
+              >
+                View Passengers
+              </button>
+              <button
+                onClick={() => handleTabChange('booking')}
+                style={navButtonStyle('booking')}
+              >
+                Create Booking
+              </button>
+              <button
+                onClick={() => handleTabChange('bookings')}
+                style={navButtonStyle('bookings')}
+              >
+                View Bookings
+              </button>
+              <button
+                onClick={() => handleTabChange('seats')}
+                style={navButtonStyle('seats')}
+              >
+                🚌 Seat Allocation
+              </button>
+            </>
+          )}
+
+          {/* Available to Volunteers & Admins */}
           <button
             onClick={() => handleTabChange('export')}
             style={navButtonStyle('export')}
           >
             📊 Export Data
           </button>
-          <button
-            onClick={() => handleTabChange('pickup-points')}
-            style={navButtonStyle('pickup-points')}
-          >
-            📍 Pickup Points
-          </button>
-          <button
-            onClick={() => handleTabChange('bus-manager')}
-            style={navButtonStyle('bus-manager')}
-          >
-            🚌 Manage Buses
-          </button>
 
-          <button
-            onClick={() => handleTabChange('google-sheets')}
-            style={navButtonStyle('google-sheets')}
-          >
-            📊 Google Sheets
-          </button>
+          {/* Admin Only */}
+          {user.role === 'admin' && (
+            <>
+              <button
+                onClick={() => handleTabChange('pickup-points')}
+                style={navButtonStyle('pickup-points')}
+              >
+                📍 Pickup Points
+              </button>
+              <button
+                onClick={() => handleTabChange('bus-manager')}
+                style={navButtonStyle('bus-manager')}
+              >
+                🚌 Manage Buses
+              </button>
+              <button
+                onClick={() => handleTabChange('google-sheets')}
+                style={navButtonStyle('google-sheets')}
+              >
+                📊 Google Sheets
+              </button>
+            </>
+          )}
+
+          {/* Available to Volunteers & Admins */}
           <button
             onClick={() => handleTabChange('live-list')}
             style={navButtonStyle('live-list')}
@@ -232,18 +248,24 @@ function App() {
           >
             📋 Attendance
           </button>
-          <button
-            onClick={() => handleTabChange('journey-manager')}
-            style={navButtonStyle('journey-manager')}
-          >
-            🗓️ Journey Manager
-          </button>
-          <button
-            onClick={() => handleTabChange('delete-management')}
-            style={navButtonStyle('delete-management')}
-          >
-            🗑️ Delete Management
-          </button>
+
+          {/* Admin Only */}
+          {user.role === 'admin' && (
+            <>
+              <button
+                onClick={() => handleTabChange('journey-manager')}
+                style={navButtonStyle('journey-manager')}
+              >
+                🗓️ Journey Manager
+              </button>
+              <button
+                onClick={() => handleTabChange('delete-management')}
+                style={navButtonStyle('delete-management')}
+              >
+                🗑️ Delete Management
+              </button>
+            </>
+          )}
 
         </nav>
       </header>
