@@ -83,7 +83,7 @@ BusSewa/
 │   ├── passengers/         # Passenger models with age criteria
 │   ├── bookings/          # Journey-based booking system
 │   ├── bussewa_api/       # Main Django app
-│   └── manage_data.py     # Database backup/restore tool
+│   └── export_db.py       # Database backup/restore tool
 ├── frontend/
 │   ├── src/
 │   │   ├── components/    # React components
@@ -103,11 +103,13 @@ Update `frontend/src/config/app.config.ts` to change app name, organization, and
 ### Database Migration
 See [DATA_MANAGEMENT.md](DATA_MANAGEMENT.md) for detailed instructions.
 ```bash
-# Export current database
-python manage_data.py export > backup.json
+# Export current database (run from backend directory)
+cd backend
+python export_db.py export > ../backup.json
 
 # Import to new instance
-python manage_data.py import < backup.json
+# cd backend
+# python export_db.py import < ../backup.json
 ```
 
 ## Production Deployment

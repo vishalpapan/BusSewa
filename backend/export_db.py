@@ -26,11 +26,14 @@ def export_data():
     # Models to export in order (to handle dependencies)
     models_to_export = [
         'auth.User',
+        'authentication.UserProfile',
+        'volunteers.Volunteer',
         'passengers.Passenger', 
         'bookings.PickupPoint',
         'bookings.Journey',
         'bookings.JourneyPricing',
         'bookings.Bus',
+        'bookings.OnSpotPassenger',
         'bookings.Booking',
         'bookings.Payment',
         'bookings.SeatCancellation'
@@ -63,11 +66,14 @@ def import_data(data):
     
     models_order = [
         'auth.User',
+        'authentication.UserProfile',
+        'volunteers.Volunteer',
         'passengers.Passenger',
         'bookings.PickupPoint', 
         'bookings.Journey',
         'bookings.JourneyPricing',
         'bookings.Bus',
+        'bookings.OnSpotPassenger',
         'bookings.Booking',
         'bookings.Payment',
         'bookings.SeatCancellation'
