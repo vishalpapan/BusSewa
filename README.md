@@ -144,13 +144,5 @@ AWS EC2 DNS addresses (`ec2-xx...amazonaws.com`) **do not support free SSL (Let'
 - Enhanced export with journey-specific data
 
 ---
-How to Backup the Database
-Open your terminal and navigate to the backend directory:
-bash
-cd /home/ubuntu/BusSewa/backend
-Run the export script and save the output to a file (e.g., backup.json):
-bash
-python3 export_db.py export > backup.json
-
 
 **Built for MSS 2026** | **Version 3.1** | **Production Ready**
