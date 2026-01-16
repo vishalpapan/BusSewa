@@ -340,7 +340,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
                   onChange={handleChange}
                   style={{ width: '100%', padding: '8px', marginTop: '5px' }}
                 >
-                  <option value="">Select bus (Auto-assign if empty)</option>
+                  <option value="">Any / Unassigned</option>
                   {onwardBuses.map((bus) => (
                     <option key={bus.id} value={bus.id}>
                       Bus {bus.bus_number} (Cap: {bus.capacity})
@@ -380,7 +380,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialPassengerId }) => {
                   onChange={handleChange}
                   style={{ width: '100%', padding: '8px', marginTop: '5px' }}
                 >
-                  <option value="">Select bus (Auto-assign if empty)</option>
+                  <option value="">Any / Unassigned</option>
                   {returnBuses.map((bus) => (
                     <option key={bus.id} value={bus.id}>
                       Bus {bus.bus_number} (Cap: {bus.capacity})

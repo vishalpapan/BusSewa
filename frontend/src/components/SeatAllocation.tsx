@@ -133,9 +133,21 @@ const SeatAllocation: React.FC = () => {
 
       if (!hasJourney) return false;
 
-      // Check Date Match (New Logic)
+      // Check Bus Assignment & Date Match
       if (selectedBus) {
         const currentBus = buses.find(bus => bus.id === selectedBus);
+
+        // 1. Bus Assignment Check
+        const assignedBusId = selectedJourney === 'ONWARD'
+          ? b.onward_bus_details?.id
+          : b.return_bus_details?.id;
+
+        // If passenger is assigned to a SPECIFIC bus, they should only appear on THAT bus
+        if (assignedBusId && assignedBusId !== selectedBus) {
+          return false;
+        }
+
+        // 2. Date Match Check
         if (currentBus?.journey_details?.journey_date) {
           const busDate = new Date(currentBus.journey_details.journey_date).toDateString();
 
